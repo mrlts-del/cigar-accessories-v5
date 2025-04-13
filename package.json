@@ -1,0 +1,39 @@
+{
+  "name": "cigar-accessories-v5",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "prisma": "prisma",
+    "format": "prettier --write ."
+  },
+  "dependencies": {
+    "@prisma/client": "^5.13.0",
+    "@tanstack/react-query": "^4.36.1",
+    "cloudinary": "^1.41.3",
+    "next": "^14.2.28",
+    "next-auth": "^4.24.6",
+    "prisma": "^5.13.0",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "recharts": "^2.7.2",
+    "resend": "^4.2.0",
+    "shadcn-ui": "^0.9.5",
+    "zustand": "^4.4.7"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.30",
+    "@types/react": "^18.2.70",
+    "@types/react-dom": "^18.2.19",
+    "autoprefixer": "^10.4.16",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "^14.2.3",
+    "postcss": "^8.4.38",
+    "prettier": "^3.2.5",
+    "tailwindcss": "^3.4.3",
+    "typescript": "^5.4.5"
+  }
+}
