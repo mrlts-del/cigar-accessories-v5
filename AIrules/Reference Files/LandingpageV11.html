@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Cigar Accessories | Luxury Collection | DEFY ORDINARY</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Discover our premium collection of luxury cigar accessories. Featuring precision cutters, humidors, and more for the discerning cigar enthusiast.">
+    <meta name="keywords" content="cigar accessories, luxury humidor, cigar cutter, premium cigars">
+    <link rel="canonical" href="https://defyordinary.com/accessories" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Premium Cigar Accessories | DEFY ORDINARY">
+    <meta property="og:description" content="Luxury cigar accessories for the discerning enthusiast">
+    <meta property="og:image" content="https://defyordinary.com/images/og-image.jpg">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Premium Cigar Accessories | DEFY ORDINARY">
+    <meta name="twitter:description" content="Luxury cigar accessories for the discerning enthusiast">
+    <meta name="twitter:image" content="https://defyordinary.com/images/twitter-image.jpg">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', Arial, sans-serif;
+        }
+
+        body {
+            background-color: #fff;
+        }
+
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Sticky Header */
+        .header-wrapper {
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            background: black;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .cart-icon {
+            color: white;
+            font-size: 24px;
+            position: relative;
+        }
+
+        .cart-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #D4AF37;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Header Styles */
+        header {
+            background-color: black;
+            padding: 2rem 0;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            color: white;
+            font-size: 32px;
+            font-weight: bold;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+        }
+
+        /* Hero Section Enhancements */
+        .hero {
+            margin-top: 80px;
+            position: relative;
+            color: white;
+            padding: 8rem 0;
+            text-align: center;
+            overflow: hidden;  /* Ensure video doesn't overflow */
+        }
+
+        .video-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            min-height: 100vh; /* Ensure full viewport height coverage */
+        }
+
+        .video-background:after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);  /* Dark overlay for better text visibility */
+        }
+
+        .video-background video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+            min-height: 100%;
+            -webkit-transform: translateZ(0);  /* iOS optimization */
+            transform: translateZ(0);
+            will-change: transform;  /* Performance optimization */
+            backface-visibility: hidden;  /* Additional performance boost */
+        }
+
+        .hero .container {
+            position: relative;
+            z-index: 1;  /* Ensure content appears above video */
+        }
+
+        .hero h1 {
+            font-size: 48px;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero p {
+            margin-bottom: 2.5rem;
+            font-size: 18px;
+        }
+
+        .primary-cta {
+            background-color: #D4AF37;
+            color: white;
+            padding: 1.2rem 3rem;
+            border-radius: 5px;
+            font-size: 20px;
+            font-weight: bold;
+            text-decoration: none;
+            display: inline-block;
+            transition: transform 0.3s ease;
+        }
+
+        .primary-cta:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Trust Section */
+        .trust-section {
+            background: #f8f8f8;
+            padding: 4rem 0;
+            text-align: center;
+        }
+
+        .trust-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .trust-item {
+            padding: 2rem;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .trust-icon {
+            font-size: 40px;
+            margin-bottom: 1rem;
+        }
+
+        /* Product Grid Enhancements */
+        .product-section {
+            position: relative;
+        }
+
+        .urgency-banner {
+            background: #FFE5E5;
+            color: #D63031;
+            text-align: center;
+            padding: 0.5rem;
+            font-weight: bold;
+            margin-bottom: 2rem;
+        }
+
+        /* Product Grid */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            padding: 2rem 0;
+        }
+
+        .product-card {
+            border: 1px solid #ddd;
+            padding: 2rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100%;
+            justify-content: space-between;
+        }
+
+        .product-image {
+            width: 200px;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 5px;
+            transition: transform 0.3s ease;
+            margin-bottom: 1rem;
+        }
+
+        .product-image:hover {
+            transform: scale(1.05);
+        }
+
+        /* Add fallback for failed images */
+        .product-image:not([src]), 
+        .product-image[src=""] {
+            opacity: 0;
+        }
+
+        .product-image {
+            opacity: 0;
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .product-content {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            justify-content: space-between;
+            width: 100%;
+            align-items: center;
+        }
+
+        .product-info {
+            margin-bottom: 1rem;
+            width: 100%;
+            text-align: center;
+        }
+
+        .product-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-description {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-price {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .add-to-cart {
+            background-color: #8B4513;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            min-height: 44px;
+            width: 100%;
+            max-width: 200px;
+            transition: all 0.3s ease;
+        }
+
+        .add-to-cart:hover {
+            background-color: #A0522D;
+            transform: scale(1.05);
+        }
+
+        /* Lounge Section */
+        .lounge {
+            background-color: #222;
+            padding: 4rem 0;
+            text-align: center;
+            color: white;
+            position: relative;  /* Added for video positioning */
+            overflow: hidden;    /* Contain the video */
+        }
+
+        .lounge .video-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .lounge .video-background:after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8); /* Darker overlay for better text visibility */
+        }
+
+        .lounge .video-background video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .lounge .container {
+            position: relative;
+            z-index: 1; /* Ensure content appears above video */
+        }
+
+        .lounge h2 {
+            position: relative;
+            z-index: 1;
+            font-size: 30px;
+            margin-bottom: 2rem;
+        }
+
+        .lounge p {
+            color: #ccc;
+            line-height: 1.6;
+        }
+
+        .line-group {
+            position: relative;
+            z-index: 1;
+            background-color: rgba(51, 51, 51, 0.9); /* Semi-transparent background */
+            margin: 2rem auto;
+            padding: 2rem;
+            max-width: 400px;
+            border-radius: 5px;
+        }
+
+        .line-group h3 {
+            white-space: nowrap;
+            font-size: 20px;  /* Further reduced size */
+            margin-bottom: 1rem;
+            color: white;
+            max-width: 100%;  /* Ensure it doesn't overflow container */
+            overflow: hidden;  /* Hide any overflow */
+            padding: 0 10px;  /* Add some padding */
+        }
+
+        @media (max-width: 480px) {
+            .line-group h3 {
+                font-size: 18px;  /* Even smaller on mobile */
+            }
+        }
+
+        .line-group p {
+            font-weight: bold;
+        }
+
+        .qr-code {
+            width: 110px;
+            height: 90px;
+            background-color: white;
+            margin: 1.5rem auto;
+        }
+
+        /* Blog Section */
+        .blog {
+            padding: 4rem 0;
+            text-align: center;
+        }
+
+        .blog-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin-top: 2rem;
+        }
+
+        .blog-card {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 1.5rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .blog-image {
+            width: 100%;
+            height: 150px;
+            margin-bottom: 1.5rem;
+            object-fit: cover;
+        }
+
+        .blog-card h3 {
+            font-size: 15px;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            line-height: 1.4;
+            text-align: center;
+        }
+
+        .blog-card p {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+            flex-grow: 1;
+            text-align: center;
+        }
+
+        .read-more {
+            background-color: #D4AF37;
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 2rem;
+            border-radius: 5px;
+            display: block;
+            margin: 1rem auto 0;
+            width: fit-content;
+            text-align: center;
+        }
+
+        /* Enhanced LINE Community Section Enhancements */
+        .benefits-list {
+            position: relative;
+            z-index: 1;
+            list-style: none;
+            margin: 3rem auto;  /* Increased margin */
+            max-width: 800px;   /* Increased max-width for better text flow */
+            padding: 0;
+            text-align: center;
+        }
+
+        .benefits-list li {
+            margin-bottom: 2rem;
+            color: #ccc;
+            font-size: 18px;    /* Increased font size */
+            line-height: 1.8;   /* Increased line height */
+            padding: 0 2rem;    /* Added horizontal padding */
+        }
+
+        /* Remove the icon-related styles */
+        .benefits-list li:before {
+            content: none;
+        }
+
+        /* Enhanced Footer */
+        .footer-policies {
+            background: #111;
+            padding: 2rem 0;
+            margin-top: 2rem;
+        }
+
+        .policy-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .policy-item {
+            color: #ccc;
+        }
+
+        .policy-item h4 {
+            color: white;
+            margin-bottom: 1rem;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .trust-grid,
+            .policy-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero h1 {
+                font-size: 36px;
+                padding: 0 20px;
+            }
+
+            .nav-links {
+                display: flex;
+                position: fixed;
+                top: 0;
+                right: -100%;
+                width: 250px;
+                height: 100vh;
+                background-color: black;
+                flex-direction: column;
+                padding: 80px 20px 20px;
+                transition: right 0.3s ease;
+                z-index: 1000;
+                align-items: center;
+                justify-content: flex-start;
+            }
+
+            .nav-links.active {
+                right: 0;
+            }
+
+            .nav-links a {
+                padding: 15px 0;
+                font-size: 20px;
+                width: 100%;
+                text-align: center;
+                display: block;
+                color: white;
+            }
+
+            .mobile-menu-button {
+                display: block;
+            }
+
+            .product-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            body {
+                font-size: 16px;
+            }
+
+            .video-background video {
+                object-position: center;  /* Ensure mobile video is centered */
+            }
+        }
+
+        @media (max-width: 480px) {
+            .product-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .product-card {
+                padding: 1.5rem;
+            }
+
+            .add-to-cart {
+                width: 100%;
+                max-width: 180px;
+            }
+        }
+
+        /* Trust Badge */
+        .trust-badge {
+            background: #fff;
+            border-radius: 50%;
+            width: 120px;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 2rem auto;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        /* Hamburger Menu Styles */
+        .hamburger {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 24px;
+            position: relative;
+            z-index: 1001;
+        }
+
+        .hamburger span {
+            display: block;
+            width: 100%;
+            height: 2px;
+            background-color: white;
+            margin: 5px 0;
+            transition: all 0.3s ease;
+        }
+
+        /* Mobile Styles */
+        @media (max-width: 768px) {
+            .hamburger {
+                display: block;
+            }
+
+            .nav-links {
+                position: fixed;
+                top: 0;
+                right: -100%;
+                width: 250px;
+                height: 100vh;
+                background-color: black;
+                flex-direction: column;
+                padding: 80px 20px 20px;
+                transition: right 0.3s ease;
+                z-index: 1000;
+            }
+
+            .nav-links.active {
+                right: 0;
+            }
+
+            .nav-links a {
+                padding: 15px 0;
+                font-size: 20px;
+                width: 100%;
+                text-align: center;
+            }
+
+            .cart-icon {
+                margin-top: 20px;
+            }
+
+            /* Hamburger Animation */
+            .hamburger.active span:nth-child(1) {
+                transform: rotate(45deg) translate(5px, 5px);
+            }
+
+            .hamburger.active span:nth-child(2) {
+                opacity: 0;
+            }
+
+            .hamburger.active span:nth-child(3) {
+                transform: rotate(-45deg) translate(7px, -7px);
+            }
+
+            /* Add overlay when menu is open */
+            .menu-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.5);
+                z-index: 999;
+            }
+
+            .menu-overlay.active {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header-wrapper">
+        <header>
+            <nav class="container">
+                <div class="logo">DEFY ORDINARY</div>
+                <button class="hamburger" aria-label="Menu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                <div class="nav-links">
+                    <a href="#">Home</a>
+                    <a href="#">Collection</a>
+                    <a href="#">Cigar Lounge</a>
+                    <a href="#">Blog</a>
+                    <a href="#">Contact</a>
+                    <div class="cart-icon">
+                        🛒
+                        <span class="cart-count">0</span>
+                    </div>
+                </div>
+            </nav>
+        </header>
+    </header>
+
+    <main>
+        <!-- Updated Hero Section -->
+        <section class="hero">
+            <div class="video-background">
+                <video 
+                    autoplay 
+                    muted 
+                    playsinline 
+                    webkit-playsinline
+                    preload="auto"
+                    poster="https://res.cloudinary.com/dvumjbuwj/video/upload/v1741597553/SmokeBackground_emdqlg.jpg">
+                    <source src="https://res.cloudinary.com/dvumjbuwj/video/upload/v1741597553/SmokeBackground_emdqlg.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="container">
+                <h1>Premium Cigar Accessories for the Discerning Enthusiast</h1>
+                <p>Elevate your cigar experience with our luxury collection</p>
+                <a href="#products" class="primary-cta">Explore Collection</a>
+            </div>
+        </section>
+
+        <!-- Enhanced Trust Section -->
+        <section class="trust-section">
+            <div class="container">
+                <div class="trust-grid">
+                    <div class="trust-item">
+                        <div class="trust-icon">🛡️</div>
+                        <h3>30-Day Guarantee</h3>
+                        <p>100% satisfaction guaranteed or your money back</p>
+                    </div>
+                    <div class="trust-item">
+                        <div class="trust-icon">🔒</div>
+                        <h3>Secure Payments</h3>
+                        <p>Your transactions are safe with us</p>
+                    </div>
+                    <div class="trust-item">
+                        <div class="trust-icon">⭐</div>
+                        <h3>Customer Love</h3>
+                        <p>"The finest accessories I've ever owned" - James S.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Product Schema Markup -->
+        <script type="application/ld+json">
+        {
+            "@context": "https://schema.org/",
+            "@type": "Product",
+            "name": "Premium Cigar Accessories Collection",
+            "description": "Luxury cigar accessories for the discerning enthusiast",
+            "brand": {
+                "@type": "Brand",
+                "name": "DEFY ORDINARY"
+            }
+        }
+        </script>
+    </main>
+
+    <!-- Product Section with Urgency -->
+    <section id="products" class="container">
+        <div class="urgency-banner">
+            Limited stock available - Order now while supplies last
+        </div>
+        <div class="product-grid">
+            <div class="product-card">
+                <img src="https://lh3.googleusercontent.com/d/1BiSaLxuEHWlMgckLh2Y-9UfTlmXIQgaD" 
+                     alt="Precision Cigar Cutter" 
+                     class="product-image"
+                     loading="lazy">
+                <div class="product-content">
+                    <div class="product-info">
+                        <h3 class="product-title">Precision Cigar Cutter</h3>
+                        <p class="product-description">Premium stainless steel cutter</p>
+                        <p class="product-price">$89.99</p>
+                    </div>
+                    <button class="add-to-cart">Add to Cart</button>
+                </div>
+            </div>
+
+            <div class="product-card">
+                <img src="https://lh3.googleusercontent.com/d/1P6jI2MFYqZiSYQ9t4w-6pzNIXWFQiAyI" 
+                     alt="Luxury Humidor" 
+                     class="product-image"
+                     loading="lazy">
+                <div class="product-content">
+                    <div class="product-info">
+                        <h3 class="product-title">Luxury Humidor</h3>
+                        <p class="product-description">Cedar-lined storage case</p>
+                        <p class="product-price">$199.99</p>
+                    </div>
+                    <button class="add-to-cart">Add to Cart</button>
+                </div>
+            </div>
+
+            <div class="product-card">
+                <img src="https://lh3.googleusercontent.com/d/1WpOwglfLZflOeWlJxwOBw9b8KELeVFDl" 
+                     alt="Torch Lighter" 
+                     class="product-image"
+                     loading="lazy">
+                <div class="product-content">
+                    <div class="product-info">
+                        <h3 class="product-title">Torch Lighter</h3>
+                        <p class="product-description">Triple flame butane lighter</p>
+                        <p class="product-price">$69.99</p>
+                    </div>
+                    <button class="add-to-cart">Add to Cart</button>
+                </div>
+            </div>
+
+            <div class="product-card">
+                <img src="https://lh3.googleusercontent.com/d/1S8wPM-a739IYo3vBS2jAVrttNtdiEuey" 
+                     alt="Travel Case" 
+                     class="product-image"
+                     loading="lazy">
+                <div class="product-content">
+                    <div class="product-info">
+                        <h3 class="product-title">Travel Case</h3>
+                        <p class="product-description">Leather 5-cigar travel case</p>
+                        <p class="product-price">$129.99</p>
+                    </div>
+                    <button class="add-to-cart">Add to Cart</button>
+                </div>
+            </div>
+
+            <div class="product-card">
+                <img src="https://lh3.googleusercontent.com/d/14i0c_1CsCn0-NgJXsOY_sBRnrTbG85b0" 
+                     alt="Ashtray Set" 
+                     class="product-image"
+                     loading="lazy">
+                <div class="product-content">
+                    <div class="product-info">
+                        <h3 class="product-title">Ashtray Set</h3>
+                        <p class="product-description">Crystal ashtray with accessories</p>
+                        <p class="product-price">$149.99</p>
+                    </div>
+                    <button class="add-to-cart">Add to Cart</button>
+                </div>
+            </div>
+
+            <div class="product-card">
+                <img src="https://lh3.googleusercontent.com/d/1WCCcLfoaWORMnNoCWoyCLQc3BVRXhfYM" 
+                     alt="Cigar Punch" 
+                     class="product-image"
+                     loading="lazy">
+                <div class="product-content">
+                    <div class="product-info">
+                        <h3 class="product-title">Cigar Punch</h3>
+                        <p class="product-description">Keychain bullet punch</p>
+                        <p class="product-price">$39.99</p>
+                    </div>
+                    <button class="add-to-cart">Add to Cart</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Enhanced LINE Community Section -->
+    <section class="lounge">
+        <div class="video-background">
+            <video 
+                autoplay 
+                muted 
+                playsinline 
+                webkit-playsinline
+                preload="auto"
+                poster="https://res.cloudinary.com/dvumjbuwj/video/upload/v1741597902/LoungePromo_nadgsz.jpg">
+                <source src="https://res.cloudinary.com/dvumjbuwj/video/upload/v1741597902/LoungePromo_nadgsz.mp4" type="video/mp4">
+            </video>
+        </div>
+        <div class="container">
+            <h2>Experience Our Exclusive Lounge - Opening 2026</h2>
+            <ul class="benefits-list">
+                <li>Our premium venue will offer a sophisticated haven where aficionados,
+                    cocktail enthusiasts, and culinary explorers converge for a holistic
+                    sensory journey.</li>
+                <li>Immerse yourself in our meticulously curated pairing menus,
+                    where each dish harmonizes with premium beverages to create
+                    transcendent flavor experiences.</li>
+            </ul>
+            
+            <div class="line-group">
+                <h3>Join Our LINE Community</h3>
+                <p>Scan this QR code</p>
+                <div class="qr-code"></div>
+                <p>Connect with fellow enthusiasts and receive early access<br>
+                   to curated events and special offers</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="blog">
+        <div class="container">
+            <h2>Cigar Enthusiast Blog</h2>
+            <p>Insights, tips, and stories from the world of premium cigars</p>
+            
+            <div class="blog-grid">
+                <div class="blog-card">
+                    <img src="https://lh3.googleusercontent.com/d/1y2gCHg4Zk3tL7czbOgdYWd3FrU6O5lbi" 
+                         alt="Cigar Selection Guide" 
+                         class="blog-image">
+                    <h3>The Ultimate Cigar Selection Guide</h3>
+                    <p>Learn how to choose the perfect cigar for any occasion. Discover the nuances of flavor profiles and find your ideal strength level.</p>
+                    <a href="#" class="read-more">Read More</a>
+                </div>
+
+                <div class="blog-card">
+                    <img src="https://lh3.googleusercontent.com/d/10zRGI22OwEDODlxAOcb9IIwtJxD6_fxz" 
+                         alt="Cigar Cutting Guide" 
+                         class="blog-image">
+                    <h3>Mastering the Art of Cigar Cutting</h3>
+                    <p>Explore the various techniques of cigar cutting and understand how each method can enhance your overall smoking experience.</p>
+                    <a href="#" class="read-more">Read More</a>
+                </div>
+
+                <div class="blog-card">
+                    <img src="https://lh3.googleusercontent.com/d/12Fu0Mopw_V_alNKXFgAUg_YGLbyOMVLD" 
+                         alt="Humidor Maintenance" 
+                         class="blog-image">
+                    <h3>Essential Humidor Maintenance</h3>
+                    <p>Master the art of maintaining the perfect environment for your cigars. Learn expert techniques for humidity control and proper storage.</p>
+                    <a href="#" class="read-more">Read More</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Enhanced Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-policies">
+                <div class="policy-grid">
+                    <div class="policy-item">
+                        <h4>Shipping Policy</h4>
+                        <p>Free shipping on orders over $100</p>
+                        <p>2-3 business days delivery</p>
+                    </div>
+                    <div class="policy-item">
+                        <h4>Return Policy</h4>
+                        <p>30-day hassle-free returns</p>
+                        <p>Free return shipping</p>
+                    </div>
+                    <div class="policy-item">
+                        <h4>Contact Us</h4>
+                        <p>support@defyordinary.com</p>
+                        <p>1-800-CIGARS</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Add this script at the end of your body tag -->
+    <script>
+        // Sticky header behavior
+        window.addEventListener('scroll', function() {
+            const header = document.querySelector('.header-wrapper');
+            if (window.scrollY > 50) {
+                header.style.background = 'rgba(0,0,0,0.9)';
+            } else {
+                header.style.background = 'black';
+            }
+        });
+
+        // Add to Cart functionality
+        const addToCartButtons = document.querySelectorAll('.add-to-cart');
+        const cartCount = document.querySelector('.cart-count');
+        let count = 0;
+
+        addToCartButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                count++;
+                cartCount.textContent = count;
+                button.textContent = 'Added to Cart';
+                setTimeout(() => {
+                    button.textContent = 'Add to Cart';
+                }, 2000);
+            });
+        });
+
+        // Handle mobile video playback
+        document.addEventListener('DOMContentLoaded', function() {
+            const videos = document.querySelectorAll('video');
+            
+            videos.forEach(video => {
+                // Ensure video plays on iOS
+                video.setAttribute('playsinline', '');
+                video.setAttribute('webkit-playsinline', '');
+                
+                // Force video play on mobile
+                video.play().catch(function(error) {
+                    console.log("Video play failed:", error);
+                });
+                
+                // Handle visibility changes
+                document.addEventListener("visibilitychange", function() {
+                    if (document.visibilityState === 'visible') {
+                        video.play().catch(function(error) {
+                            console.log("Video play failed:", error);
+                        });
+                    }
+                });
+            });
+        });
+
+        // Add this to your existing script section
+        document.addEventListener('DOMContentLoaded', function() {
+            const hamburger = document.querySelector('.hamburger');
+            const navLinks = document.querySelector('.nav-links');
+            const body = document.body;
+
+            // Create overlay element
+            const overlay = document.createElement('div');
+            overlay.className = 'menu-overlay';
+            body.appendChild(overlay);
+
+            hamburger.addEventListener('click', function() {
+                hamburger.classList.toggle('active');
+                navLinks.classList.toggle('active');
+                overlay.classList.toggle('active');
+                body.style.overflow = body.style.overflow === 'hidden' ? '' : 'hidden';
+            });
+
+            // Close menu when clicking overlay
+            overlay.addEventListener('click', function() {
+                hamburger.classList.remove('active');
+                navLinks.classList.remove('active');
+                overlay.classList.remove('active');
+                body.style.overflow = '';
+            });
+
+            // Close menu when clicking a link
+            navLinks.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', function() {
+                    hamburger.classList.remove('active');
+                    navLinks.classList.remove('active');
+                    overlay.classList.remove('active');
+                    body.style.overflow = '';
+                });
+            });
+        });
+    </script>
+</body>
+</html>

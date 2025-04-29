@@ -3,6 +3,7 @@ node_modules/
 
 # Environment variables
 .env.local
+.env
 
 # Build output
 .next/

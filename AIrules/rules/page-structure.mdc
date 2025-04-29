@@ -9,4 +9,15 @@ alwaysApply: false
 - Components for the page are either put in `page.tsx`, or in the `apps/web/app/(app)/PAGE_NAME` folder
 - Pages are Server components so you can load data into them directly
 - If we're in a deeply nested component we will use `swr` to fetch via API
-- If you need to use `onClick` in a component, that component is a client component and file must start with `use client` 
+- If you need to use `onClick` in a component, that component is a client component and file must start with `"use client"` directive at the top
+
+## TypeScript and ESLint Guidelines
+- Remove unused imports and variables from your files
+- Prefix intentionally unused variables with underscore (e.g., `_variableName`, `_e` for unused event parameters)
+- Don't declare variables that won't be used later in the code
+- Avoid using `any` type - specify proper types instead (use `unknown` if type is uncertain)
+- Use proper event types like `React.MouseEvent<HTMLButtonElement>` for event handlers
+- Escape special characters in JSX: use `&apos;` for single quotes and `&quot;` for double quotes
+- Make sure all functions have parameter and return types defined
+- Server Components should not include client-side interactivity
+- Client Components must have `"use client"` at the top of the file

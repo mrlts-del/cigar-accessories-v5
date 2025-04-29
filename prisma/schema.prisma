@@ -1,0 +1,340 @@
+// Prisma schema for E-commerce Store
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Enums
+enum UserRole {
+  CUSTOMER
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum AddressType {
+  SHIPPING
+  BILLING
+}
+enum BlogPostStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+// Models
+
+model User {
+  id            String     @id @default(uuid())
+  email         String     @unique
+  password      String
+  name          String
+  role          UserRole
+  emailVerified DateTime?
+  image         String?
+  deletedAt     DateTime?  // Soft delete
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  addresses     Address[]
+  orders        Order[]
+  cart          Cart?
+  reviews       Review[]
+  accounts      Account[]
+  sessions      Session[]
+
+  @@index([email])
+}
+
+model Product {
+  id          String      @id @default(uuid())
+  name        String
+  description String
+  slug        String      @unique
+  price       Decimal
+  deletedAt   DateTime?   // Soft delete
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  imagePath     String?     // Relative path to local image
+
+  basePrice   Decimal
+  salePrice   Decimal?
+  tags        String[]
+  media       ProductMedia[]
+  seoTitle    String?
+  seoDescription String?
+  categories  ProductCategory[] // Many-to-many relation
+
+  variants    Variant[]
+  reviews     Review[]
+
+  @@index([slug])
+}
+
+model Variant {
+  id         String    @id @default(uuid())
+  productId  String
+  size       String?
+  color      String?
+  sku        String    @unique
+  inventory  Int
+  price      Decimal
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  product    Product   @relation(fields: [productId], references: [id])
+  orderItems OrderItem[]
+  cartItems  CartItem[]
+
+  @@index([productId])
+}
+
+
+model Order {
+  id             String      @id @default(uuid())
+  userId         String
+  status         OrderStatus
+  deletedAt      DateTime?   // Soft delete
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  user           User        @relation(fields: [userId], references: [id])
+  items          OrderItem[]
+  payment        Payment?
+  shippingAddrId String?
+  billingAddrId  String?
+  shippingAddr   Address?    @relation("ShippingAddress", fields: [shippingAddrId], references: [id])
+  billingAddr    Address?    @relation("BillingAddress", fields: [billingAddrId], references: [id])
+
+  @@index([userId])
+  @@index([status])
+}
+
+model OrderItem {
+  id        String   @id @default(uuid())
+  orderId   String
+  variantId String
+  quantity  Int
+  price     Decimal
+
+  order     Order    @relation(fields: [orderId], references: [id])
+  variant   Variant  @relation(fields: [variantId], references: [id])
+
+  @@index([orderId])
+  @@index([variantId])
+}
+
+model Cart {
+  id        String     @id @default(uuid())
+  userId    String     @unique
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  user      User       @relation(fields: [userId], references: [id])
+  items     CartItem[]
+}
+
+model CartItem {
+  id        String   @id @default(uuid())
+  cartId    String
+  variantId String
+  quantity  Int
+
+  cart      Cart     @relation(fields: [cartId], references: [id])
+  variant   Variant  @relation(fields: [variantId], references: [id])
+
+  @@index([cartId])
+  @@index([variantId])
+}
+
+model Payment {
+  id             String        @id @default(uuid())
+  orderId        String        @unique
+  status         PaymentStatus
+  amount         Decimal
+  provider       String
+  transactionId  String
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  order          Order         @relation(fields: [orderId], references: [id])
+}
+
+model Address {
+  id        String      @id @default(uuid())
+  userId    String
+  type      AddressType
+  line1     String
+  line2     String?
+  city      String
+  state     String
+  postal    String
+  country   String
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  user      User        @relation(fields: [userId], references: [id])
+  shippingOrders Order[] @relation("ShippingAddress")
+  billingOrders  Order[] @relation("BillingAddress")
+}
+
+model Review {
+  id        String    @id @default(uuid())
+  userId    String
+  productId String
+  rating    Int
+  comment   String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  user      User      @relation(fields: [userId], references: [id])
+  product   Product   @relation(fields: [productId], references: [id])
+
+  @@index([userId])
+  @@index([productId])
+}
+
+// Store Settings
+model StoreSetting {
+  key       String    @id @unique
+  value     String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+// NextAuth.js required models
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?
+  access_token       String?
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Billboard {
+  id        String   @id @default(uuid())
+  label     String
+  imageUrl  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ProductMedia {
+  id        String   @id @default(uuid())
+  productId String
+  url       String
+  altText   String?
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  product   Product  @relation(fields: [productId], references: [id])
+
+  @@index([productId])
+}
+
+model Author {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  bio           String?
+  profileImageUrl String?
+  posts         BlogPost[]
+}
+model Category {
+  id        String     @id @default(cuid())
+  name      String
+  slug      String     @unique
+  posts     BlogPost[] // Many-to-many relation
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@index([slug])
+}
+
+model ProductCategory {
+  id             String            @id @default(uuid())
+  name           String
+  slug           String            @unique
+  description    String?
+  bannerImageUrl String?
+  displayOrder   Int               @default(0)
+  parentId       String?
+  parent         ProductCategory?  @relation("CategoryToCategory", fields: [parentId], references: [id])
+  children       ProductCategory[] @relation("CategoryToCategory")
+  products       Product[]         // Many-to-many relation
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  @@index([slug])
+}
+model BlogPost {
+  id               String         @id @default(cuid())
+  title            String
+  slug             String         @unique
+  content          String
+  excerpt          String
+  featuredImageUrl String?
+  status           BlogPostStatus
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  publishedAt      DateTime?
+  authorId         String
+  author           Author         @relation(fields: [authorId], references: [id])
+  categories       Category[]
+  tags             String[]
+  metaTitle        String?
+  metaDescription  String?
+  canonicalUrl     String?
+
+  @@index([authorId])
+  @@index([slug])
+}
