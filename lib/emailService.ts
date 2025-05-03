@@ -1,7 +1,8 @@
 /// <reference types="node" />
 import { Resend } from 'resend';
-// Removed unused Product import
-import { Order, User, OrderItem, Payment, Address, OrderStatus } from '@prisma/client'; // Added OrderStatus
+import type { Address } from '../types/address';
+import type { OrderItem, Order, OrderStatus, Payment } from '../types/order';
+import type { User } from '../types/user';
 import { format } from 'date-fns'; // For formatting date
 import { Decimal } from '@prisma/client/runtime/library'; // Import Decimal
 
@@ -107,7 +108,7 @@ export const sendOrderConfirmationEmail = async (data: OrderConfirmationData) =>
 
   // Use payment amount if available (convert Decimal to number), otherwise use calculated total
   const displayTotal = order.payment?.amount
-    ? (order.payment.amount.toNumber()).toFixed(2) // Convert Decimal to number
+    ? order.payment.amount.toFixed(2) // Fix: Removed toNumber() call
     : calculatedTotal.toFixed(2);
 
   const emailBody = `

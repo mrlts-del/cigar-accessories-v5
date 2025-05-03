@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Product, Variant } from '@prisma/client';
+import type { Product, Variant } from 'types/product';
 import { AdvancedImage } from "@cloudinary/react";
 // Removed unused quality import
 import Image from 'next/image'; // Import next/image

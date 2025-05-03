@@ -1,16 +1,42 @@
 import { PrismaClient } from '@prisma/client';
-import { faker } from '@faker-js/faker'; // Assuming faker is available or can be added
+import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
 async function main() {
   console.log('Start seeding ...');
 
+  const adminEmail = process.env.ADMIN_EMAIL;
+  const adminPassword = process.env.ADMIN_PASSWORD;
+
+  if (!adminEmail || !adminPassword) {
+    console.log('Skipping admin user creation: ADMIN_EMAIL and ADMIN_PASSWORD environment variables are not set.');
+  } else {
+    const existingAdmin = await prisma.user.findUnique({
+      where: { email: adminEmail },
+    });
+
+    if (existingAdmin) {
+      console.log(`Admin user with email ${adminEmail} already exists.`);
+    } else {
+      const hashedPassword = await bcrypt.hash(adminPassword, 10);
+      const adminUser = await prisma.user.create({
+        data: {
+          email: adminEmail,
+          passwordHash: hashedPassword,
+          isAdmin: true,
+        },
+      });
+      console.log(`Created admin user with id: ${adminUser.id}`);
+    }
+  }
+
+  // Keep existing seeding logic for categories and products
   // Create placeholder categories
   const category1 = await prisma.category.create({
     data: {
       name: 'Category 1',
-      slug: 'category-1', // Add this line
+      slug: 'category-1',
     },
   });
 
@@ -24,46 +50,46 @@ async function main() {
   // Create 6 placeholder products
   for (let i = 1; i <= 6; i++) {
     const productName = `Test Product ${i}`;
-    const productDescription = faker.lorem.paragraphs(2);
-    const basePrice = faker.commerce.price({ min: 10, max: 100, dec: 2 });
-    const salePrice = i % 2 === 0 ? parseFloat(faker.commerce.price({ min: 5, max: parseFloat(basePrice), dec: 2 })) as number : undefined;
-    const tags = faker.lorem.words(3).split(' ');
+    const productDescription = 'Placeholder description'; // Simplified for brevity
+    const basePrice = 10 + i; // Simplified for brevity
+    const salePrice = i % 2 === 0 ? (basePrice * 0.8) : undefined; // Simplified for brevity
+    const tags = [`tag${i}`, 'test']; // Simplified for brevity
     const seoTitle = `${productName} | E-commerce Store`;
-    const seoDescription = faker.lorem.sentence();
+    const seoDescription = `SEO description for ${productName}`; // Simplified for brevity
 
     const product = await prisma.product.create({
       data: {
         name: productName,
         description: productDescription,
-        slug: faker.lorem.slug() + `-${i}`,
-        price: parseFloat(basePrice), // Add the required price field
-        basePrice: parseFloat(basePrice),
+        slug: `test-product-${i}`, // Simplified for brevity
+        price: basePrice,
+        basePrice: basePrice,
         salePrice: salePrice,
         tags: tags,
         seoTitle: seoTitle,
         seoDescription: seoDescription,
         categories: {
-          connect: [{ id: category1.id }, { id: category2.id }], // Link to placeholder categories
+          connect: [{ id: category1.id }, { id: category2.id }],
         },
         media: {
           create: [
             {
-              url: faker.image.url(),
+              url: `https://example.com/image${i}-1.jpg`, // Simplified for brevity
               altText: `${productName} Image 1`,
               order: 1,
             },
             {
-              url: faker.image.url(),
+              url: `https://example.com/image${i}-2.jpg`, // Simplified for brevity
               altText: `${productName} Image 2`,
               order: 2,
             },
           ],
         },
-        // Add placeholder data for other required fields if any
       },
     });
     console.log(`Created product with id: ${product.id}`);
   }
+
 
   console.log('Seeding finished.');
 }

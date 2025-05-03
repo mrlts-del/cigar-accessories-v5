@@ -3,7 +3,7 @@ import React, { Suspense } from "react";
 // Removed unused dynamic import
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/authOptions";
 import AnalyticsDashboard from "./AnalyticsDashboard";
 import LoadingContent from '@/app/components/ui/loading-content'; // Import LoadingContent
 
@@ -12,7 +12,7 @@ export default async function AnalyticsPage() {
   const session = await getServerSession(authOptions);
 
   // Only allow admins
-  if (!session || session.user.role !== "admin") {
+  if (!session || !session.user.isAdmin) {
     redirect("/admin"); // Or show a 403 page if preferred
   }
 

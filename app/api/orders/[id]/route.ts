@@ -2,9 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 // Removed unused z import
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/authOptions";
 import { withError } from "@/lib/withError"; // Use shared error handler
-import { UserRole } from "@prisma/client"; // Import UserRole
 
 // Removed local withError definition
 // GET /api/orders/:id - Get order details
@@ -15,12 +14,12 @@ export const GET = withError(
   ) => {
     // 1. Get authenticated user session
     const session = await getServerSession(authOptions); // Revert to getServerSession
-    if (!session?.user?.id || !session.user.role) { // Ensure role is available
+    if (!session?.user?.id) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
     const userId = session.user.id;
     // Role is needed for authorization check below
-    const userRole = session.user.role;
+    const userIsAdmin = session.user.isAdmin;
 
     // 2. Get order ID from params
     const { id } = await params;
@@ -63,7 +62,7 @@ export const GET = withError(
     }
 
     // 5. Authorization Check: Allow if user is ADMIN or owns the order
-    const isAdmin = userRole === UserRole.ADMIN; // Use userRole from session
+    const isAdmin = userIsAdmin; // Use userIsAdmin from session
     const isOwner = order.userId === userId;
 
     if (!isAdmin && !isOwner) {
@@ -83,11 +82,11 @@ export const DELETE = withError(
   ) => {
     // 1. Authentication Check
     const session = await getServerSession(authOptions); // Revert to getServerSession
-    if (!session?.user?.id || !session.user.role) { // Ensure role is available
+    if (!session?.user?.id) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
     const userId = session.user.id;
-    const userRole = session.user.role;
+    const userIsAdmin = session.user.isAdmin;
 
     // 2. Get order ID from params
     const { id } = await params;
@@ -113,7 +112,7 @@ export const DELETE = withError(
     }
 
     // 6. Authorization Check: Allow if user is ADMIN or owns the order
-    const isAdmin = userRole === UserRole.ADMIN;
+    const isAdmin = userIsAdmin;
     const isOwner = order.userId === userId;
 
     if (!isAdmin && !isOwner) {

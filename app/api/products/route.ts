@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic'; // Mark the route as dynamic
 import { NextResponse } from "next/server";
+import { Decimal } from '@prisma/client/runtime/library';
 import { prisma } from "@/lib/prisma"; // Assuming prisma is exported as a named export
 import { withError } from "@/lib/withError"; // Assuming withError is exported as a named export
 // Define response type
@@ -31,6 +32,20 @@ interface ProductWithDetails {
   categories: Category[];
 }
 
+interface ProductQueryResult {
+  id: string;
+  name: string;
+  description: string | null;
+  price: Decimal;
+  createdAt: Date;
+  updatedAt: Date;
+  media: ProductMedia[];
+  categories: Category[];
+  variants: Array<{
+    sku: string;
+    inventory: number;
+  }>;
+}
 // Define response type using the specific interface
 export type GetProductsResponse = {
   products: ProductWithDetails[];
@@ -164,7 +179,7 @@ export const GET = withError(async (request: NextRequest) => {
   ]);
 
   // Map the query result to ProductWithDetails type
-  const productsWithDetails: ProductWithDetails[] = products.map(product => ({
+  const productsWithDetails: ProductWithDetails[] = products.map((product: ProductQueryResult) => ({
     id: product.id,
     name: product.name,
     description: product.description,

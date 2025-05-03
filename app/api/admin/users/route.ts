@@ -1,10 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'; // Correct path to authOptions
+import { authOptions } from '@/lib/authOptions';
 import { prisma } from '@/lib/prisma';
 import { withError } from '@/lib/withError';
-import { UserRole, Prisma } from '@prisma/client'; // Import Prisma namespace
-
 export const dynamic = 'force-dynamic';
 // Define expected query parameters using Zod (optional but good practice)
 // For simplicity here, we'll parse directly from URLSearchParams
@@ -18,7 +16,7 @@ export const GET = withError(async (request: Request) => { // Removed GetAdminUs
   }
 
   // 2. Authorization Check (Admin Only)
-  if (session.user.role !== UserRole.ADMIN) {
+  if (!session.user.isAdmin) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
@@ -32,7 +30,8 @@ export const GET = withError(async (request: Request) => { // Removed GetAdminUs
   // 3. Data Fetching Logic
   try {
     // Use Prisma type for where clause
-    const whereClause: Prisma.UserWhereInput = {};
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const whereClause: any = {};
     if (search) {
       whereClause.OR = [
         { name: { contains: search, mode: 'insensitive' } },
@@ -46,7 +45,7 @@ export const GET = withError(async (request: Request) => { // Removed GetAdminUs
         id: true,
         name: true,
         email: true,
-        role: true,
+        isAdmin: true,
         createdAt: true, // Signup Date
         image: true, // Include image if needed for display
       },

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "../auth/[...nextauth]/route";
+import { authOptions } from 'lib/authOptions';
 
 export async function GET() { // Removed unused request parameter
   const session = await getServerSession(authOptions);

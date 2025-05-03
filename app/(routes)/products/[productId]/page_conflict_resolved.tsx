@@ -1,6 +1,6 @@
 "use client";
 
-import { Variant } from "@prisma/client";
+import type { Variant } from 'types/product';
 import { notFound } from "next/navigation";
 import Container from "@/components/ui/container";
 import Image from "next/image";

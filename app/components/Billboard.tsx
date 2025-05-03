@@ -1,4 +1,4 @@
-import { Billboard as BillboardType } from '@prisma/client';
+import type { Billboard as BillboardType } from '../../types/billboard';
 import React from 'react';
 
 interface BillboardProps {

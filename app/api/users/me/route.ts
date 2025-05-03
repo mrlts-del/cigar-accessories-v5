@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { z } from "zod";
 
-import { authOptions } from "@/app/api/auth/[...nextauth]/route"; // Adjust path if needed
+import { authOptions } from "@/lib/authOptions";
 import { prisma } from "@/lib/prisma";
 import { withError } from "@/lib/withError"; // Assuming withError exists and handles errors
 
@@ -36,7 +36,7 @@ export const GET = withError(async () => {
 
   // Exclude password hash before sending response
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { password, ...userWithoutPassword } = user; // Keep destructuring but mark password unused
+  const { passwordHash, ...userWithoutPassword } = user; // Keep destructuring but mark password unused
 
   return NextResponse.json(userWithoutPassword);
 });
@@ -87,7 +87,7 @@ export const PATCH = withError(async (request: Request) => {
 
   // Exclude password hash before sending response
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { password, ...userWithoutPassword } = updatedUser; // Keep destructuring but mark password unused
+  const { passwordHash, ...userWithoutPassword } = updatedUser; // Keep destructuring but mark password unused
 
   return NextResponse.json(userWithoutPassword);
 });

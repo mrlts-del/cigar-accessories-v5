@@ -2,10 +2,10 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/authOptions";
 import { withError } from "@/lib/withError";
-import { UserRole, OrderStatus as PrismaOrderStatus } from "@prisma/client"; // Import UserRole and OrderStatus enum
-import { sendOrderStatusUpdateEmail } from "@/lib/emailService"; // Import email service function
+import { OrderStatus } from "@/types/order";
+import { sendOrderStatusUpdateEmail } from "@/lib/emailService";
 
 // OrderStatus enum values
 const ORDER_STATUSES = [
@@ -16,18 +16,18 @@ const ORDER_STATUSES = [
   "CANCELLED",
   "REFUNDED",
 ] as const;
-// Use Prisma's generated OrderStatus type if it matches, otherwise keep the local one if needed for validation logic.
-// Assuming ORDER_STATUSES aligns with Prisma's OrderStatus enum.
-type OrderStatus = PrismaOrderStatus;
+
+type OrderStatusType = OrderStatus;
 
 // Allowed status transitions
+// Use OrderStatus enum values directly
 const ALLOWED_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
-  PENDING: ["PAID", "CANCELLED"],
-  PAID: ["SHIPPED", "CANCELLED", "REFUNDED"],
-  SHIPPED: ["DELIVERED", "REFUNDED"],
-  DELIVERED: ["REFUNDED"],
-  CANCELLED: [],
-  REFUNDED: [],
+  [OrderStatus.PENDING]: [OrderStatus.PAID, OrderStatus.CANCELLED],
+  [OrderStatus.PAID]: [OrderStatus.SHIPPED, OrderStatus.CANCELLED, OrderStatus.REFUNDED],
+  [OrderStatus.SHIPPED]: [OrderStatus.DELIVERED, OrderStatus.REFUNDED],
+  [OrderStatus.DELIVERED]: [OrderStatus.REFUNDED],
+  [OrderStatus.CANCELLED]: [],
+  [OrderStatus.REFUNDED]: [],
 };
 
 // Zod schema for PATCH body
@@ -44,7 +44,7 @@ export const PATCH = withError(
   ) => {
     // Authentication and Authorization
     const session = await getServerSession(authOptions);
-    if (!session?.user || session.user.role !== UserRole.ADMIN) {
+    if (!session?.user || !session.user.isAdmin) {
       return NextResponse.json({ error: "Not authorized" }, { status: 403 });
     }
 
@@ -67,9 +67,9 @@ export const PATCH = withError(
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
-    // Validate allowed transition (using Prisma's OrderStatus type)
-    const allowed = ALLOWED_TRANSITIONS[currentOrder.status];
-    if (!allowed || !allowed.includes(newStatus)) { // Check if allowed is defined
+    // Validate allowed transition
+    const allowed = ALLOWED_TRANSITIONS[currentOrder.status as OrderStatusType];
+    if (!allowed || !allowed.includes(newStatus as OrderStatusType)) {
       return NextResponse.json(
         { error: `Invalid status transition from ${currentOrder.status} to ${newStatus}` },
         { status: 400 }
@@ -80,7 +80,7 @@ export const PATCH = withError(
     const updatedOrderWithUser = await prisma.order.update({
       where: { id },
       data: { status: newStatus },
-      include: { // Include user details for email notification
+      include: {
         user: {
           select: {
             email: true,
@@ -92,36 +92,29 @@ export const PATCH = withError(
 
     // Send email notification asynchronously (fire-and-forget)
     if (updatedOrderWithUser.user?.email) {
-      // Use a separate try/catch for email sending to avoid blocking the response
       try {
         console.log(`Order ${updatedOrderWithUser.id} status updated to ${newStatus}. Attempting to send notification email to ${updatedOrderWithUser.user.email}`);
-        // Don't await, let it run in background. Handle promise resolution/rejection.
         sendOrderStatusUpdateEmail({
           to: updatedOrderWithUser.user.email,
           customerName: updatedOrderWithUser.user.name,
           orderId: updatedOrderWithUser.id,
-          newStatus: updatedOrderWithUser.status, // Use status from the updated record
+          newStatus: updatedOrderWithUser.status,
         }).then(result => {
-            if (!result.success) {
-                // Log email sending failures
-                console.error(`Failed to send status update email for order ${updatedOrderWithUser.id}:`, result.error || 'Unknown email sending error');
-            } else {
-                console.log(`Status update email successfully queued for order ${updatedOrderWithUser.id}. Email ID: ${result.data?.id}`);
-            }
+          if (!result.success) {
+            console.error(`Failed to send status update email for order ${updatedOrderWithUser.id}:`, result.error || 'Unknown email sending error');
+          } else {
+            console.log(`Status update email successfully queued for order ${updatedOrderWithUser.id}. Email ID: ${result.data?.id}`);
+          }
         }).catch(emailError => {
-            // Catch potential promise rejection errors from the async function itself
-             console.error(`Unhandled error sending status update email for order ${updatedOrderWithUser.id}:`, emailError);
+          console.error(`Unhandled error sending status update email for order ${updatedOrderWithUser.id}:`, emailError);
         });
       } catch (syncError) {
-         // Catch synchronous errors during the initiation of email sending (less likely)
-         console.error(`Synchronous error trying to initiate status update email for order ${updatedOrderWithUser.id}:`, syncError);
+        console.error(`Synchronous error trying to initiate status update email for order ${updatedOrderWithUser.id}:`, syncError);
       }
     } else {
-        console.warn(`Order ${updatedOrderWithUser.id} updated to ${newStatus}, but user email not found. Skipping notification.`);
+      console.warn(`Order ${updatedOrderWithUser.id} updated to ${newStatus}, but user email not found. Skipping notification.`);
     }
 
-    // Return successful response with updated order data (excluding user details)
-    // Removed unused 'user' variable from destructuring
     const { ...orderData } = updatedOrderWithUser;
     return NextResponse.json({ order: orderData });
   }

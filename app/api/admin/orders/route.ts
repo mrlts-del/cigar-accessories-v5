@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/authOptions";
 import { prisma } from "@/lib/prisma";
 import { withError } from "@/lib/withError";
-import { UserRole, Prisma, OrderStatus } from "@prisma/client"; // Import Prisma namespace and OrderStatus
+import type { OrderStatus } from 'types/order';
 import { z } from "zod";
 
 export const dynamic = 'force-dynamic';
@@ -20,7 +20,11 @@ const querySchema = z.object({
 });
 
 // Define a type for the where clause to avoid 'any'
-type OrderWhereClause = Prisma.OrderWhereInput;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type OrderWhereClause = any;
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type BasicOrder = any;
 
 async function getAdminOrders(options: z.infer<typeof querySchema>) {
   const { page, limit, sortBy, sortOrder, status, search } = options;
@@ -72,7 +76,7 @@ async function getAdminOrders(options: z.infer<typeof querySchema>) {
   const totalPages = Math.ceil(totalOrders / limit);
 
   // 2. Extract order IDs
-  const orderIds = basicOrders.map(order => order.id);
+  const orderIds = basicOrders.map((order: BasicOrder) => order.id);
 
   // 3. Fetch relevant OrderItems
   const orderItems = await prisma.orderItem.findMany({
@@ -94,11 +98,11 @@ async function getAdminOrders(options: z.infer<typeof querySchema>) {
   }
 
   // 5. Combine data into AdminOrder structure
-  const typedOrders: AdminOrder[] = basicOrders.map(order => ({
-    ...order,
-    total: orderTotals[order.id] || 0, // Add calculated total
-    status: order.status as string, // Ensure status is string for the type
-  }));
+  const typedOrders: AdminOrder[] = basicOrders.map((order: BasicOrder) => ({
+  ...order,
+  total: orderTotals[order.id] || 0, // Add calculated total
+  status: order.status as string, // Ensure status is string for the type
+}));
 
   return {
     orders: typedOrders,
@@ -138,7 +142,7 @@ export type GetAdminOrdersResponse = {
 export const GET = withError(async (request: Request) => {
   // Authentication and Authorization
   const session = await getServerSession(authOptions);
-  if (!session?.user || session.user.role !== UserRole.ADMIN) {
+  if (!session?.user || !session.user.isAdmin) {
     return NextResponse.json({ error: "Not authorized" }, { status: 403 });
   }
 

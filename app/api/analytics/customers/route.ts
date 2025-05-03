@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/authOptions";
 
 export const dynamic = 'force-dynamic';
 // Define a more flexible type for the handler function
@@ -36,9 +36,9 @@ async function adminAuth() { // Removed unused _request parameter
   // Query user to check role
   const user = await prisma.user.findUnique({
     where: { email: session.user.email },
-    select: { role: true },
+    select: { isAdmin: true },
   });
-  if (!user || user.role !== "ADMIN") {
+  if (!user || !user.isAdmin) {
     return { error: "Forbidden", status: 403 };
   }
   return { session };
@@ -106,8 +106,8 @@ export const GET = withError(async (request: Request) => {
   const users = await prisma.user.findMany({
     where: {
       createdAt: { gte: startDate },
-      deletedAt: null,
-      role: "CUSTOMER",
+      // deletedAt: null, // Removed as per schema
+      // role: "CUSTOMER", // Removed as per schema
     },
     select: {
       id: true,

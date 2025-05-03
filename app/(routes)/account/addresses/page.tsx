@@ -5,7 +5,7 @@ import useSWR from 'swr';
 import { toast } from 'react-hot-toast';
 import { Loader2 } from 'lucide-react';
 
-import { AddressType } from '@prisma/client';
+import { Address } from '../../../../types/address';
 
 import { fetcher } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,16 +18,6 @@ import {
 } from '@/app/components/ui/dialog';
 import AccountAddressForm from '../components/AccountAddressForm'; // Using the new account address form
 
-interface Address {
-  id: string;
-  name: string;
-  street: string;
-  city: string;
-  state: string;
-  zip: string;
-  country: string;
-  type: AddressType; // Include type
-}
 
 const AddressesPage = () => {
   const { data: addresses, error, isLoading, mutate } = useSWR<Address[]>('/api/users/me/addresses', fetcher);
@@ -97,7 +87,7 @@ const AddressesPage = () => {
               <div key={address.id} className="border p-4 rounded-md flex justify-between items-center">
                 <div>
                   <p>{address.name}</p>
-                  <p className="text-sm text-muted-foreground">{address.street}, {address.city}, {address.state} {address.zip}, {address.country}</p>
+                  <p className="text-sm text-muted-foreground">{address.line1}, {address.city}, {address.state} {address.postal}, {address.country}</p>
                 </div>
                 <div className="flex space-x-2">
                   <Button variant="outline" size="sm" onClick={() => handleEditAddressClick(address)}>Edit</Button>

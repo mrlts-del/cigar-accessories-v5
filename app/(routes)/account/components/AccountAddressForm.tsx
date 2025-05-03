@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'react-hot-toast';
-import { AddressType } from '@prisma/client'; // Assuming AddressType is available from Prisma
+import { Address, AddressType } from 'types/address';
 
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -18,17 +18,6 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 
-// Define types for address data
-interface Address {
-  id: string;
-  name: string;
-  street: string;
-  city: string;
-  state: string;
-  zip: string;
-  country: string;
-  type: AddressType; // Include type
-}
 
 interface AccountAddressFormProps {
   initialData?: Address | null;
@@ -40,10 +29,11 @@ const addressSchema = z.object({
   id: z.string().optional(),
   type: z.nativeEnum(AddressType),
   name: z.string().min(1, 'Name is required'),
-  street: z.string().min(1, 'Street address is required'),
+  line1: z.string().min(1, 'Street address is required'),
+  line2: z.string().nullable().optional(),
   city: z.string().min(1, 'City is required'),
   state: z.string().min(1, 'State/Province is required'),
-  zip: z.string().min(1, 'Zip/Postal code is required'),
+  postal: z.string().min(1, 'Zip/Postal code is required'),
   country: z.string().min(1, 'Country is required'),
 });
 
@@ -59,10 +49,11 @@ const AccountAddressForm: React.FC<AccountAddressFormProps> = ({
       id: initialData?.id || '',
       type: initialData?.type || AddressType.SHIPPING, // Default to SHIPPING
       name: initialData?.name || '',
-      street: initialData?.street || '',
+      line1: initialData?.line1 || '',
+      line2: initialData?.line2 ?? '',
       city: initialData?.city || '',
       state: initialData?.state || '',
-      zip: initialData?.zip || '',
+      postal: initialData?.postal || '',
       country: initialData?.country || '',
     },
   });
@@ -73,10 +64,11 @@ const AccountAddressForm: React.FC<AccountAddressFormProps> = ({
       id: initialData?.id || '',
       type: initialData?.type || AddressType.SHIPPING,
       name: initialData?.name || '',
-      street: initialData?.street || '',
+      line1: initialData?.line1 || '',
+      line2: initialData?.line2 ?? '',
       city: initialData?.city || '',
       state: initialData?.state || '',
-      zip: initialData?.zip || '',
+      postal: initialData?.postal || '',
       country: initialData?.country || '',
     });
   }, [initialData, form]);
@@ -136,12 +128,25 @@ const AccountAddressForm: React.FC<AccountAddressFormProps> = ({
         />
         <FormField
           control={form.control}
-          name="street"
+          name="line1"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Street Address</FormLabel>
               <FormControl>
                 <Input placeholder="123 Main St" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="line2"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Apartment, suite, unit, etc. (optional)</FormLabel>
+              <FormControl>
+                <Input placeholder="Apartment 4B" {...field} value={field.value ?? ''} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -175,7 +180,7 @@ const AccountAddressForm: React.FC<AccountAddressFormProps> = ({
         />
         <FormField
           control={form.control}
-          name="zip"
+          name="postal"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Zip / Postal Code</FormLabel>

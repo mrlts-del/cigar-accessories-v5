@@ -8,7 +8,7 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input"; // Added Input
 import { useToast } from "hooks/use-toast";
 import Image from "next/image";
-import { Variant } from "@prisma/client"; // Added Variant type
+import type { Variant } from "@/types/product";
 const productSchema = z.object({
   name: z.string().min(2, "Name is required"),
   description: z.string().min(5, "Description is required"),

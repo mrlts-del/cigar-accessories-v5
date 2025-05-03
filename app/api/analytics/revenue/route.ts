@@ -2,8 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { Prisma } from "@prisma/client"; // Import Prisma namespace
+import { authOptions } from "@/lib/authOptions";
 
 export const dynamic = 'force-dynamic';
 // Define a more flexible type for the handler function
@@ -34,9 +33,9 @@ async function adminAuth() { // Removed unused _request parameter
   // Query user to check role
   const user = await prisma.user.findUnique({
     where: { email: session.user.email },
-    select: { role: true },
+    select: { isAdmin: true },
   });
-  if (!user || user.role !== "ADMIN") {
+  if (!user || !user.isAdmin) {
     return { error: "Forbidden", status: 403 };
   }
   return { session };
@@ -103,12 +102,13 @@ export const GET = withError(async (request: Request) => {
   }
 
   // Build filters
-  const where: Prisma.OrderWhereInput = { // Use Prisma type
-    createdAt: { gte: startDate },
-    ...(product ? { items: { some: { variant: { productId: product } } } } : {}),
-    ...(category ? { items: { some: { variant: { product: { categories: { some: { id: category } } } } } } } : {}),
-    deletedAt: null,
-  };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const where: any = {
+      createdAt: { gte: startDate },
+      ...(product ? { items: { some: { variant: { productId: product } } } } : {}),
+      ...(category ? { items: { some: { variant: { product: { categories: { some: { id: category } } } } } } } : {}),
+      // deletedAt: null, // Removed as per schema
+    };
 
   // Aggregate revenue
   const orders = await prisma.order.findMany({
@@ -141,7 +141,8 @@ export const GET = withError(async (request: Request) => {
     if (!revenueMap[key]) {
       revenueMap[key] = 0;
     }
-    revenueMap[key] += order.items.reduce((sum, item) => sum + Number(item.price) * item.quantity, 0);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    revenueMap[key] += order.items.reduce((sum: any, item: any) => sum + Number(item.price) * item.quantity, 0);
   }
 
   // Format result

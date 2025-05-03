@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/authOptions";
 import { prisma } from "@/lib/prisma";
-import { CartItem, Variant, Product } from "@prisma/client"; // Import necessary types
+import type { CartItem } from "@/types/cart";
+import type { Product, Variant } from "@/types/product";
 
 // Define a more flexible type for the handler function
 type RequestHandler = (request: Request, ...args: unknown[]) => Promise<Response | NextResponse>;

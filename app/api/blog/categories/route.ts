@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withError } from "@/lib/withError";
-import { Category } from "@prisma/client"; // Import Category type
+import type { Category } from "@/types/blog";
 
 // Define response type based on Category model
 export type GetBlogCategoriesResponse = Pick<Category, 'id' | 'name'>[];

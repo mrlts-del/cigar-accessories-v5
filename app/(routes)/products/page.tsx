@@ -3,7 +3,8 @@ import { Suspense } from 'react';
 import ProductGrid from '@/app/components/ProductGrid'; // Assuming this exists for layout
 // import ProductCard from '@/app/components/ProductCard'; // Removed unused import
 import { prisma } from '@/lib/prisma'; // Direct DB access for RSC
-import { Prisma, Category, Product } from '@prisma/client'; // Import Prisma namespace and types
+import type { Product } from '@/types/product';
+import type { ProductCategory } from '@/types/product-category';
 import { z } from 'zod';
 import ProductFilters from '@/app/components/ProductFilters'; // Import the filters component
 import { Skeleton } from '@/components/ui/skeleton'; // For loading state
@@ -54,13 +55,14 @@ async function ProductList({ searchParams }: ProductsPageProps) {
   } = parsed.success ? parsed.data : {};
 
   // Build Prisma where clause with specific type
-  const where: Prisma.ProductWhereInput = { deletedAt: null };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const where: any = {}; // Correct initialization and typing
   if (categoryId) where.categories = { some: { id: categoryId } };
   if (minPrice !== undefined) {
-    where.price = { ...(where.price as Prisma.DecimalFilter<"Product"> | undefined), gte: minPrice };
+    where.price = { ...(where.price), gte: minPrice };
   }
   if (maxPrice !== undefined) {
-    where.price = { ...(where.price as Prisma.DecimalFilter<"Product"> | undefined), lte: maxPrice };
+    where.price = { ...(where.price), lte: maxPrice };
   }
   if (search) {
     where.OR = [
@@ -70,36 +72,45 @@ async function ProductList({ searchParams }: ProductsPageProps) {
   }
 
   // Build Prisma orderBy clause with specific type
-  const orderBy: Prisma.ProductOrderByWithRelationInput = {};
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const orderBy: any = {};
   const [field, direction] = sort.split('_');
   if (['createdAt', 'price', 'name'].includes(field) && ['asc', 'desc'].includes(direction)) {
-    orderBy[field as keyof Prisma.ProductOrderByWithRelationInput] = direction as Prisma.SortOrder;
+    orderBy[field] = direction;
   } else {
      orderBy.createdAt = 'desc'; // Fallback default sort
   }
 
 
   const skip = (page - 1) * pageSize;
-  const take = pageSize;
+  const limit = pageSize;
 
   // Fetch categories and product data concurrently
   // Adjust type annotation to match selected product and category fields
-  type SelectedCategory = Pick<Category, 'id' | 'name'>;
-  const [products, total, categories]: [Product[], number, SelectedCategory[]] = await Promise.all([
+  const [products, total, categories]: [Product[], number, ProductCategory[]] = await Promise.all([
     prisma.product.findMany({
-      where,
-      orderBy,
-      skip,
-      take,
+          where,
+          orderBy,
+          skip,
+          take: limit,
+          include: {
+            variants: true,
+          },
     }),
     prisma.product.count({ where }),
-    prisma.category.findMany({ // Fetch all categories
-      // Removed deletedAt filter as it's likely not on the Category model
+    prisma.productCategory.findMany({
       orderBy: { name: 'asc' },
-      select: { // Select only fields needed for filters
+      select: {
         id: true,
         name: true,
-      }
+        slug: true,
+        description: true,
+        bannerImageUrl: true,
+        displayOrder: true,
+        parentId: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     }),
   ]);
 

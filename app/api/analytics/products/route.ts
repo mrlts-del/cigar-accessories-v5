@@ -2,11 +2,11 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { Prisma } from "@prisma/client"; // Import Prisma namespace
+import { authOptions } from "@/lib/authOptions";
 
 export const dynamic = 'force-dynamic';
 // Define a more flexible type for the handler function
+
 type RequestHandler = (request: Request, ...args: unknown[]) => Promise<Response | NextResponse>;
 
 // Error handler wrapper
@@ -34,9 +34,9 @@ async function adminAuth() { // Removed unused _request parameter
   // Query user to check role
   const user = await prisma.user.findUnique({
     where: { email: session.user.email },
-    select: { role: true },
+    select: { isAdmin: true },
   });
-  if (!user || user.role !== "ADMIN") {
+  if (!user || !user.isAdmin) {
     return { error: "Forbidden", status: 403 };
   }
   return { session };
@@ -109,10 +109,11 @@ export const GET = withError(async (request: Request) => {
   }
 
   // Build filters
-  const orderWhere: Prisma.OrderWhereInput = { // Use Prisma type
-    createdAt: { gte: startDate },
-    deletedAt: null,
-  };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const orderWhere: any = {
+      createdAt: { gte: startDate },
+      // deletedAt: null, // Removed as per schema
+    };
 
   // Get all order items in range, with product info
   const orderItems = await prisma.orderItem.findMany({

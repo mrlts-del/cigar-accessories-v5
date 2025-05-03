@@ -2,9 +2,9 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { z } from "zod";
-import { Prisma, AddressType } from "@prisma/client";
+import { AddressType } from "@/types/address";
 
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/authOptions";
 import { prisma } from "@/lib/prisma";
 import { withError } from "@/lib/withError";
 
@@ -137,7 +137,8 @@ export const DELETE = withError(async (_request: Request, { params }: RouteParam
     return new NextResponse(null, { status: 204 }); // No Content
   } catch (error) {
     console.error("Failed to delete address:", error);
-     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     if ((error as any).code === 'P2025') {
         // Record to delete not found (already handled by verifyAddressOwner, but good practice)
         return NextResponse.json({ message: "Address not found" }, { status: 404 });
     }

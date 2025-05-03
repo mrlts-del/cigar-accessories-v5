@@ -2,13 +2,14 @@
 import { z } from "zod";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/authOptions";
 import { prisma } from "@/lib/prisma";
 import { withError } from "@/lib/withError";
-// Import necessary types
-import { OrderStatus, PaymentStatus, Prisma, Address /*, AddressType*/ } from "@prisma/client"; // Removed unused AddressType
+// Import necessary types locally
+import type { Address } from "@/types/address";
+import { OrderStatus, PaymentStatus } from "@/types/order";
 import { Decimal } from "@prisma/client/runtime/library";
-import { sendOrderConfirmationEmail, OrderConfirmationData } from "@/lib/emailService"; // Added OrderConfirmationData
+import { sendOrderConfirmationEmail, OrderConfirmationData } from "@/lib/emailService";
 
 // Custom error for insufficient inventory
 class InsufficientInventoryError extends Error {
@@ -43,26 +44,12 @@ type TapPayResponse = TapPaySuccessResponse | TapPayErrorResponse;
 // --- Business Logic ---
 
 // Type for cart items with included relations
-type CartItemWithDetails = Prisma.CartItemGetPayload<{
-  include: {
-    variant: {
-      include: {
-        product: true;
-      };
-    };
-  };
-}>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type CartItemWithDetails = any;
 
 // Define type for the fully populated order needed for email
-type OrderWithDetails = Prisma.OrderGetPayload<{
-    include: {
-        items: { include: { variant: { include: { product: true } } } },
-        payment: true,
-        shippingAddr: true, // Use correct relation name
-        billingAddr: true,  // Use correct relation name
-        user: { select: { id: true, name: true, email: true } }
-    }
-}>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type OrderWithDetails = any;
 
 // Define type for user details needed for email
 type UserDetails = { id: string; name: string | null; email: string | null };
@@ -105,20 +92,46 @@ async function processCheckout(body: CheckoutBody, userEmail: string) {
   // 2. Fetch Addresses and Validate Ownership
   const shippingAddress = await prisma.address.findUnique({
     where: { id: shippingAddressId },
+    select: {
+      id: true,
+      line1: true,
+      line2: true,
+      city: true,
+      state: true,
+      postal: true,
+      country: true,
+      type: true,
+      createdAt: true,
+      updatedAt: true,
+      userId: true,
+    },
   });
   if (!shippingAddress || shippingAddress.userId !== user.id) {
     throw new Error("Invalid shipping address.");
   }
 
-  let billingAddress: Address = shippingAddress; // Default to shipping address
+  let billingAddress: Address = shippingAddress as Address; // Default to shipping address
   if (effectiveBillingAddressId !== shippingAddressId) {
     const foundBillingAddress = await prisma.address.findUnique({
       where: { id: effectiveBillingAddressId },
+      select: {
+        id: true,
+        line1: true,
+        line2: true,
+        city: true,
+        state: true,
+        postal: true,
+        country: true,
+        type: true,
+        createdAt: true,
+        updatedAt: true,
+        userId: true,
+      },
     });
     if (!foundBillingAddress || foundBillingAddress.userId !== user.id) {
       throw new Error("Invalid billing address.");
     }
-    billingAddress = foundBillingAddress;
+    billingAddress = foundBillingAddress as Address;
   }
   // billingAddress is now guaranteed non-null
 
@@ -186,7 +199,8 @@ async function processCheckout(body: CheckoutBody, userEmail: string) {
   let orderId: string | null = null;
 
   try {
-    const result = await prisma.$transaction(async (tx) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const result = await prisma.$transaction(async (tx: any) => {
       // --- Inventory Check ---
       for (const item of cartItems) {
         const variant = await tx.variant.findUnique({ // Use correct model name
@@ -265,7 +279,8 @@ async function processCheckout(body: CheckoutBody, userEmail: string) {
           // Check if all necessary details for the email are present
           if (orderWithDetails?.user && orderWithDetails.items && orderWithDetails.shippingAddr && orderWithDetails.payment) {
             // Transform items to match the expected structure for the email service
-            const transformedItems = orderWithDetails.items.map(item => ({
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const transformedItems = orderWithDetails.items.map((item: any) => ({
               // Copy necessary OrderItem fields (ensure these match OrderItemWithProduct base)
               id: item.id,
               quantity: item.quantity,
@@ -281,7 +296,8 @@ async function processCheckout(body: CheckoutBody, userEmail: string) {
 
             // Construct the order data for the email service carefully
             // Cast orderWithDetails to ensure type checker recognizes all fields from the base Order model
-            const fullOrderDetails = orderWithDetails as typeof orderWithDetails & { total: Prisma.Decimal, paymentId: string | null, shippingAddrId: string | null, billingAddrId: string | null };
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const fullOrderDetails = orderWithDetails as any;
 
             const orderDataForEmail: OrderConfirmationData['order'] = {
               // Include fields explicitly defined in OrderWithDetails from emailService.ts

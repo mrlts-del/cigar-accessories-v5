@@ -46,14 +46,14 @@ enum BlogPostStatus {
 model User {
   id            String     @id @default(uuid())
   email         String     @unique
-  password      String
-  name          String
-  role          UserRole
-  emailVerified DateTime?
+  name          String?
   image         String?
-  deletedAt     DateTime?  // Soft delete
+  passwordHash  String? // Make passwordHash optional for social logins
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
+  passwordResetToken String?  @unique
+  passwordResetExpires DateTime?
+  isAdmin       Boolean  @default(false)
 
   addresses     Address[]
   orders        Order[]

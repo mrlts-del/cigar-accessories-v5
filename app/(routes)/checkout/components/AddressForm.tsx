@@ -6,7 +6,7 @@ import useSWR from 'swr';
 import { z } from "zod";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Address, AddressType } from "@prisma/client"; // Assuming AddressType is available from Prisma
+import { Address, AddressType } from "@/types/address";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";

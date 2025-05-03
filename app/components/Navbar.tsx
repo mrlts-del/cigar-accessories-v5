@@ -4,7 +4,8 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Menu, Search, User, ShoppingCart } from "lucide-react"; // Added ShoppingCart
+import { useSession, signOut } from "next-auth/react"; // Import useSession and signOut
+import { Menu, Search, ShoppingCart } from "lucide-react"; // Removed unused User import
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -19,6 +20,7 @@ const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCartDrawerOpen, setIsCartDrawerOpen] = useState(false); // State for CartDrawer
   const cartStore = useCartStore(); // Use cart store to get item count
+  const { status } = useSession();
 
   const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -142,13 +144,27 @@ const Navbar = () => {
           {/* Cart Drawer Component */}
           <CartDrawer open={isCartDrawerOpen} onOpenChange={setIsCartDrawerOpen} />
 
-          {/* Account/Login Icon (Placeholder) */}
-          <Button variant="ghost" size="icon" asChild>
-            <Link href="/auth/signin"> {/* Account link */}
-              <User className="h-5 w-5" />
-              <span className="sr-only">Account</span>
-            </Link>
-          </Button>
+          {/* Account/Login/Logout */}
+          {status === 'authenticated' ? (
+            <>
+              <Link href="/account" className="text-sm font-medium text-white hover:text-gray-300">
+                Account
+              </Link>
+              <Button variant="ghost" size="sm" onClick={() => signOut()}>
+                Logout
+              </Button>
+            </>
+          ) : (
+            <>
+              <Link href="/login" className="text-sm font-medium text-white hover:text-gray-300">
+                Login
+              </Link>
+              {/* Assuming registration is part of the login page or a separate route */}
+              {/* <Link href="/register" className="text-sm font-medium text-white hover:text-gray-300">
+                Register
+              </Link> */}
+            </>
+          )}
         </div>
       </div>
     </header>

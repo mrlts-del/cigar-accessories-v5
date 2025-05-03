@@ -1,14 +1,14 @@
+import type { StoreSetting } from '@/types/settings';
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'; // Adjust path if needed
+import { authOptions } from '@/lib/authOptions';
 import { prisma } from '@/lib/prisma';
-import { UserRole, StoreSetting } from '@prisma/client'; // Re-add StoreSetting type import
 
 // GET /api/admin/settings - Fetch all settings
 export async function GET() { // Removed unused request parameter
   const session = await getServerSession(authOptions);
 
-  if (!session?.user || session.user.role !== UserRole.ADMIN) {
+  if (!session?.user || !session.user.isAdmin) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -31,7 +31,7 @@ export async function GET() { // Removed unused request parameter
 export async function PATCH(request: Request) {
   const session = await getServerSession(authOptions);
 
-  if (!session?.user || session.user.role !== UserRole.ADMIN) {
+  if (!session?.user || !session.user.isAdmin) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

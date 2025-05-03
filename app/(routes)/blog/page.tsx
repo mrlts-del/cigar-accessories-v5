@@ -1,8 +1,7 @@
 import React from 'react';
 import BlogPageClient from './BlogPageClient';
-import { BlogPost, Category, Pagination } from '@/types/blog'; // Import types from shared types file
+import { BlogPost, Category, Pagination, BlogPostStatus } from '@/types/blog'; // Import BlogPostStatus enum
 import { prisma } from '@/lib/prisma'; // Import Prisma client
-import { Prisma } from '@prisma/client'; // Import Prisma namespace for types if needed
 
 // Fetch categories directly using Prisma
 async function fetchCategories(): Promise<Category[]> {
@@ -18,7 +17,7 @@ async function fetchCategories(): Promise<Category[]> {
       },
     });
     // Ensure the fetched data matches the Category type structure
-    return categoriesData.map(cat => ({
+    return categoriesData.map((cat: Category) => ({
       id: cat.id,
       name: cat.name,
       slug: cat.slug,
@@ -37,7 +36,7 @@ async function fetchInitialPosts(): Promise<{ posts: BlogPost[]; pagination: Pag
   const skip = (page - 1) * limit;
 
   try {
-    const whereClause: Prisma.BlogPostWhereInput = { status: 'PUBLISHED' };
+    const whereClause = { status: BlogPostStatus.PUBLISHED };
 
     // Fetch total count and posts in parallel
     const [totalPosts, postsData] = await prisma.$transaction([
@@ -67,7 +66,18 @@ async function fetchInitialPosts(): Promise<{ posts: BlogPost[]; pagination: Pag
     const totalPages = Math.ceil(totalPosts / limit);
 
     // Map Prisma data to BlogPost type, handling potential nulls and date format
-    const posts: BlogPost[] = postsData.map((post) => ({
+    interface PrismaBlogPostSelect {
+      id: string;
+      title: string;
+      slug: string;
+      excerpt: string | null;
+      featuredImageUrl: string | null;
+      publishedAt: Date | null;
+      author: { name: string } | null;
+      categories: { name: string; slug: string }[];
+    }
+
+    const posts: BlogPost[] = postsData.map((post: PrismaBlogPostSelect) => ({
       id: post.id,
       title: post.title,
       slug: post.slug,

@@ -2,9 +2,10 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { z } from "zod";
-import { Prisma, AddressType } from "@prisma/client"; // Import AddressType enum
+// Removed Prisma import as it's not used directly
+import { AddressType } from "@/types/address"; // Import AddressType from local definition
 
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/authOptions";
 import { prisma } from "@/lib/prisma";
 import { withError } from "@/lib/withError";
 
@@ -63,11 +64,11 @@ export const POST = withError(async (request: Request) => {
   } catch (error) {
     console.error("Failed to create address:", error);
     // Handle potential Prisma errors
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      // Example: Handle specific errors if necessary
-      // if (error.code === 'P2002') { // Unique constraint violation
-      //   return NextResponse.json({ message: "Specific error message" }, { status: 409 });
-      // }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if ((error as any).code === 'P2002') {
+      // Handle specific errors if necessary
+      return NextResponse.json({ message: "Specific error message" }, { status: 409 });
     }
     return NextResponse.json(
       { message: "Failed to create address" },

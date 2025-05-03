@@ -2,15 +2,14 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { withError } from "@/lib/withError"; // Assuming withError is imported
-import { Prisma } from "@prisma/client"; // Import Prisma namespace
 
 export const dynamic = 'force-dynamic';
 // Query params schema for filtering, search, pagination
 const userListQuerySchema = z.object({
-  role: z.enum(["CUSTOMER", "ADMIN"]).optional(),
   search: z.string().optional(),
   page: z.string().regex(/^\d+$/).optional(),
   pageSize: z.string().regex(/^\d+$/).optional(),
+  isAdmin: z.enum(["true", "false"]).optional(), // Add isAdmin to schema
 });
 
 export type UserListQuery = z.infer<typeof userListQuerySchema>;
@@ -19,7 +18,7 @@ export type UserListItem = {
   id: string;
   email: string | null; // Email can be null based on Prisma schema
   name: string | null; // Name can be null
-  role: string;
+  isAdmin: boolean; // Change role to isAdmin
   createdAt: string;
   updatedAt: string;
 };
@@ -45,13 +44,16 @@ export const GET = withError(async (request: Request) => {
       { status: 400 }
     );
   }
-  const { role, search, page = "1", pageSize = "20" } = parsed.data;
+  const { search, page = "1", pageSize = "20", isAdmin: isAdminParam } = parsed.data; // Destructure isAdminParam
   const pageNum = parseInt(page, 10);
   const pageSizeNum = parseInt(pageSize, 10);
 
   // Build Prisma where clause
-  const where: Prisma.UserWhereInput = { deletedAt: null }; // Use Prisma type
-  if (role) where.role = role;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const where: any = {}; // Use any type with ESLint disable comment
+  if (isAdminParam !== undefined) { // Check if isAdminParam was provided
+    where.isAdmin = isAdminParam === 'true';
+  }
   if (search) {
     where.OR = [
       { name: { contains: search, mode: "insensitive" } },
@@ -72,18 +74,20 @@ export const GET = withError(async (request: Request) => {
       id: true,
       email: true,
       name: true,
-      role: true,
+      isAdmin: true, // Change role to isAdmin
       createdAt: true,
       updatedAt: true,
     },
   });
 
   const result: UserListResponse = {
-    users: users.map((u) => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    users: users.map((u: any) => ({
       ...u,
       // Ensure email and name are handled if null
       email: u.email ?? null,
       name: u.name ?? null,
+      isAdmin: u.isAdmin, // Map isAdmin
       createdAt: u.createdAt.toISOString(),
       updatedAt: u.updatedAt.toISOString(),
     })),

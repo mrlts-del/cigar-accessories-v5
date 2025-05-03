@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/lib/authOptions';
 import { prisma } from '@/lib/prisma';
 import { withError } from '@/lib/withError';
-import { UserRole } from '@prisma/client';
 
 export const GET = withError(
   async (request: Request, { params }: { params: { id: string } }) => {
@@ -15,7 +14,7 @@ export const GET = withError(
     }
 
     // 2. Authorization Check (Admin Only)
-    if (session.user.role !== UserRole.ADMIN) {
+    if (!session.user.isAdmin) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
@@ -34,7 +33,7 @@ export const GET = withError(
           name: true,
           email: true,
           // emailVerified: true, // Temporarily removed due to TS error, likely needs prisma generate
-          role: true,
+          isAdmin: true,
           createdAt: true,
           updatedAt: true,
           addresses: { // Include related addresses
