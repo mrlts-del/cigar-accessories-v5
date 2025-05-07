@@ -3,11 +3,11 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/authOptions';
 import { prisma } from '@/lib/prisma';
 import { withError } from '@/lib/withError';
-export const dynamic = 'force-dynamic';
-// Define expected query parameters using Zod (optional but good practice)
-// For simplicity here, we'll parse directly from URLSearchParams
+import { Prisma } from '@prisma/client';
 
-export const GET = withError(async (request: Request) => { // Removed GetAdminUsersResponse export for now
+export const dynamic = 'force-dynamic';
+
+export const GET = withError(async (request: Request) => {
   const session = await getServerSession(authOptions);
 
   // 1. Authentication Check
@@ -16,7 +16,7 @@ export const GET = withError(async (request: Request) => { // Removed GetAdminUs
   }
 
   // 2. Authorization Check (Admin Only)
-  if (!session.user.isAdmin) {
+  if (session.user.role !== 'ADMIN') {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
@@ -29,9 +29,7 @@ export const GET = withError(async (request: Request) => { // Removed GetAdminUs
 
   // 3. Data Fetching Logic
   try {
-    // Use Prisma type for where clause
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const whereClause: any = {};
+    const whereClause: Prisma.UserWhereInput = {};
     if (search) {
       whereClause.OR = [
         { name: { contains: search, mode: 'insensitive' } },
@@ -46,13 +44,13 @@ export const GET = withError(async (request: Request) => { // Removed GetAdminUs
         name: true,
         email: true,
         isAdmin: true,
-        createdAt: true, // Signup Date
-        image: true, // Include image if needed for display
+        createdAt: true,
+        image: true,
       },
       skip: skip,
       take: limit,
       orderBy: {
-        createdAt: 'desc', // Or order by name, etc.
+        createdAt: 'desc',
       },
     });
 
@@ -62,7 +60,6 @@ export const GET = withError(async (request: Request) => { // Removed GetAdminUs
 
     const totalPages = Math.ceil(totalUsers / limit);
 
-    // 4. Return Response
     return NextResponse.json({
       data: users,
       pagination: {
@@ -74,9 +71,6 @@ export const GET = withError(async (request: Request) => { // Removed GetAdminUs
     });
   } catch (error) {
     console.error('Error fetching users:', error);
-    // The withError middleware should handle generic errors,
-    // but specific logging can happen here.
-    // Re-throwing or returning a generic error response
     return NextResponse.json(
       { error: 'Failed to fetch users' },
       { status: 500 }

@@ -16,19 +16,15 @@ export function KpiCards() {
   const { data: kpiResponse, isLoading, error } = useKpiData('daily');
 
   const totals = useMemo(() => {
-    if (!kpiResponse?.kpis) {
+    if (!kpiResponse) {
       return { totalRevenue: 0, totalOrders: 0, totalCustomers: 0 };
     }
-    // Sum up the values from the daily data array
-    return kpiResponse.kpis.reduce(
-      (acc, day) => {
-        acc.totalRevenue += day.revenue;
-        acc.totalOrders += day.orders;
-        acc.totalCustomers += day.customers; // Assuming 'customers' represents new customers per day
-        return acc;
-      },
-      { totalRevenue: 0, totalOrders: 0, totalCustomers: 0 }
-    );
+    // Use the values directly from the kpiResponse object
+    return {
+      totalRevenue: kpiResponse.totalRevenue.value,
+      totalOrders: kpiResponse.totalOrders.value,
+      totalCustomers: kpiResponse.totalCustomers.value,
+    };
   }, [kpiResponse]);
 
   if (error) {

@@ -41,6 +41,13 @@ enum BlogPostStatus {
   ARCHIVED
 }
 
+enum ContactStatus {
+  NEW
+  IN_PROGRESS
+  RESPONDED
+  CLOSED
+}
+
 // Models
 
 model User {
@@ -337,4 +344,28 @@ model BlogPost {
 
   @@index([authorId])
   @@index([slug])
+}
+
+model ContactInquiry {
+  id        String        @id @default(cuid())
+  name      String
+  email     String
+  subject   String
+  message   String
+  timestamp DateTime      @default(now())
+  status    ContactStatus @default(NEW)
+  ip_address String?
+  user_agent String?
+
+  @@index([email])
+  @@index([status])
+}
+
+model FAQ {
+  id        String   @id @default(cuid())
+  question  String
+  answer    String   @db.Text
+  order     Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

@@ -84,29 +84,40 @@ export default function RequestResetPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100">
-      <Card className="w-[400px]">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Request Password Reset</CardTitle>
-          <CardDescription>Enter your email address to receive a reset link.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {message && (
-            <div className={`mb-4 p-3 rounded text-sm ${message.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-              {message.text}
-            </div>
-          )}
-          <form className="space-y-4" onSubmit={handleSubmit}>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="m@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
-            </div>
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? 'Sending...' : 'Send Reset Link'}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
+  <div className="flex min-h-screen items-center justify-center">
+    <Card className="w-[400px] p-6 rounded-lg shadow-md">
+      <CardHeader className="text-center space-y-2">
+        <CardTitle className="text-3xl font-semibold">Forgot Password?</CardTitle>
+        <CardDescription className="text-muted-foreground">Enter your email to receive a reset link</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {message && (
+          <div className={`mb-4 p-3 rounded text-sm ${message.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+            {message.text}
+          </div>
+        )}
+        <form className="space-y-4" onSubmit={handleSubmit}>
+          <div className="space-y-2">
+            <Label htmlFor="email">Email Address</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="name@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          <Button
+            type="submit"
+            className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
+            disabled={isLoading}
+          >
+            {isLoading ? 'Sending...' : 'Send Reset Link'}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
+  </div>
   );
 }

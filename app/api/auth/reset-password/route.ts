@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma'; // Assuming prisma client is exported as a named export
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { rateLimit } from "@/lib/rateLimiter";
 
 export async function POST(request: Request) {

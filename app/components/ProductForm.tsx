@@ -9,6 +9,7 @@ import { Input } from "./ui/input"; // Added Input
 import { useToast } from "hooks/use-toast";
 import Image from "next/image";
 import type { Variant } from "@/types/product";
+
 const productSchema = z.object({
   name: z.string().min(2, "Name is required"),
   description: z.string().min(5, "Description is required"),
@@ -39,6 +40,7 @@ type ProductFormProps = {
   };
   onSuccess?: () => void;
 };
+
 export default function ProductForm({ initialData, onSuccess }: ProductFormProps) {
   const [form, setForm] = useState({
     name: initialData?.name || "",
@@ -217,7 +219,7 @@ export default function ProductForm({ initialData, onSuccess }: ProductFormProps
                    value={variant.editableInventory}
                    onChange={(e) => handleVariantInventoryChange(index, e.target.value)}
                    className="input input-bordered input-sm w-full"
-                   disabled={uploading || mutation.isLoading}
+                   disabled={uploading || mutation.isPending}
                  />
               </div>
             </div>
@@ -227,8 +229,8 @@ export default function ProductForm({ initialData, onSuccess }: ProductFormProps
       )}
 
       <div className="flex gap-2">
-        <Button type="submit" disabled={uploading || mutation.isLoading}>
-          {uploading || mutation.isLoading
+        <Button type="submit" disabled={uploading || mutation.isPending}>
+          {uploading || mutation.isPending
             ? initialData?.id
               ? "Updating..."
               : "Creating..."

@@ -79,9 +79,9 @@ export const sendOrderConfirmationEmail = async (data: OrderConfirmationData) =>
     return { success: false, error: 'Recipient email missing' };
   }
    if (!FROM_EMAIL || FROM_EMAIL.includes('yourdomain.com')) {
-    console.warn(`FROM_EMAIL ('${FROM_EMAIL}') is not configured correctly in lib/emailService.ts. Please update it with your verified Resend domain. Skipping email.`);
-    // Return success=false or throw an error if sending should be blocked
-    return { success: false, error: 'FROM_EMAIL not configured' };
+     console.warn(`FROM_EMAIL ('${FROM_EMAIL}') is not configured correctly in lib/emailService.ts. Please update it with your verified Resend domain. Skipping email.`);
+     // Return success=false or throw an error if sending should be blocked
+     return { success: false, error: 'FROM_EMAIL not configured' };
    }
 
   const subject = `Your Cigar Accessories Order #${order.id} Confirmed!`;
@@ -101,9 +101,9 @@ export const sendOrderConfirmationEmail = async (data: OrderConfirmationData) =>
   // Add explicit types for reduce parameters
   const calculatedTotal = order.items.reduce((sum: number, item: OrderItemWithProduct) => {
      // Convert Decimal to number for calculation
-     const price = item.product.price.toNumber();
-     const quantity = typeof item.quantity === 'number' ? item.quantity : 0;
-     return sum + (price * quantity);
+    const price = item.product.price.toNumber();
+    const quantity = typeof item.quantity === 'number' ? item.quantity : 0;
+    return sum + (price * quantity);
   }, 0);
 
   // Use payment amount if available (convert Decimal to number), otherwise use calculated total
@@ -215,8 +215,8 @@ export const sendWelcomeEmail = async (to: string, user: User) => {
     return { success: false, error: 'Recipient email missing' };
   }
    if (!FROM_EMAIL || FROM_EMAIL.includes('yourdomain.com')) {
-    console.warn(`FROM_EMAIL ('${FROM_EMAIL}') is not configured correctly in lib/emailService.ts. Please update it with your verified Resend domain. Skipping email.`);
-    return { success: false, error: 'FROM_EMAIL not configured' };
+     console.warn(`FROM_EMAIL ('${FROM_EMAIL}') is not configured correctly in lib/emailService.ts. Please update it with your verified Resend domain. Skipping email.`);
+     return { success: false, error: 'FROM_EMAIL not configured' };
    }
 
   const subject = `Welcome to Your Store!`;
@@ -265,10 +265,10 @@ export const sendPasswordResetRequestEmail = async (to: string, resetLink: strin
    if (!resetLink) {
     console.error('Reset link is missing. Skipping email.');
     return { success: false, error: 'Reset link missing' };
-   }
+  }
    if (!FROM_EMAIL || FROM_EMAIL.includes('yourdomain.com')) {
-    console.warn(`FROM_EMAIL ('${FROM_EMAIL}') is not configured correctly in lib/emailService.ts. Please update it with your verified Resend domain. Skipping email.`);
-    return { success: false, error: 'FROM_EMAIL not configured' };
+     console.warn(`FROM_EMAIL ('${FROM_EMAIL}') is not configured correctly in lib/emailService.ts. Please update it with your verified Resend domain. Skipping email.`);
+     return { success: false, error: 'FROM_EMAIL not configured' };
    }
 
   const subject = `Reset Your Password`;
@@ -315,8 +315,8 @@ export const sendPasswordResetConfirmationEmail = async (to: string) => {
     return { success: false, error: 'Recipient email missing' };
   }
    if (!FROM_EMAIL || FROM_EMAIL.includes('yourdomain.com')) {
-    console.warn(`FROM_EMAIL ('${FROM_EMAIL}') is not configured correctly in lib/emailService.ts. Please update it with your verified Resend domain. Skipping email.`);
-    return { success: false, error: 'FROM_EMAIL not configured' };
+     console.warn(`FROM_EMAIL ('${FROM_EMAIL}') is not configured correctly in lib/emailService.ts. Please update it with your verified Resend domain. Skipping email.`);
+     return { success: false, error: 'FROM_EMAIL not configured' };
    }
 
   const subject = `Your Password Has Been Reset`;
@@ -364,8 +364,8 @@ export const sendShippingUpdateEmail = async (to: string, order: Order, tracking
     return { success: false, error: 'Recipient email missing' };
   }
    if (!FROM_EMAIL || FROM_EMAIL.includes('yourdomain.com')) {
-    console.warn(`FROM_EMAIL ('${FROM_EMAIL}') is not configured correctly in lib/emailService.ts. Please update it with your verified Resend domain. Skipping email.`);
-    return { success: false, error: 'FROM_EMAIL not configured' };
+     console.warn(`FROM_EMAIL ('${FROM_EMAIL}') is not configured correctly in lib/emailService.ts. Please update it with your verified Resend domain. Skipping email.`);
+     return { success: false, error: 'FROM_EMAIL not configured' };
    }
 
   const subject = `Your Order #${order.id} Has Shipped!`;
@@ -482,6 +482,166 @@ export const sendOrderStatusUpdateEmail = async (data: OrderStatusUpdateData) =>
     return { success: true, data: emailData };
   } catch (error) {
     console.error(`Failed to send order status update email to ${to} (runtime error):`, error);
+    return { success: false, error };
+  }
+};
+
+interface ContactInquiryData {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+}
+
+export const sendAdminContactNotification = async (contactInquiry: ContactInquiryData) => {
+  if (!process.env.ADMIN_EMAIL) {
+    console.error('ADMIN_EMAIL is not set. Skipping email.');
+    return { success: false, error: 'ADMIN_EMAIL not set' };
+  }
+
+  const to = process.env.ADMIN_EMAIL;
+  const subject = `New Contact Inquiry: ${contactInquiry.subject}`;
+  const emailBody = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        body { font-family: sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #eee; border-radius: 5px; }
+        h1 { color: #555; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <h1>New Contact Inquiry</h1>
+        <p><strong>Name:</strong> ${contactInquiry.name}</p>
+        <p><strong>Email:</strong> ${contactInquiry.email}</p>
+        <p><strong>Subject:</strong> ${contactInquiry.subject}</p>
+        <p><strong>Message:</strong></p>
+        <p>${contactInquiry.message}</p>
+      </div>
+    </body>
+    </html>
+  `;
+
+  try {
+    const { data, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: to,
+      subject: subject,
+      html: emailBody,
+    });
+
+    if (error) {
+      console.error(`Error sending admin contact notification email to ${to}:`, error);
+      return { success: false, error };
+    }
+
+    console.log(`Admin contact notification email sent successfully to ${to}. ID: ${data?.id}`);
+    return { success: true, data };
+  } catch (error) {
+    console.error(`Failed to send admin contact notification email to ${to}:`, error);
+    return { success: false, error };
+  }
+
+  try {
+    const { data, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: to,
+      subject: subject,
+      html: emailBody,
+    });
+
+    if (error) {
+      console.error(`Error sending admin contact notification email:`, error);
+      return { success: false, error };
+    }
+
+    console.log(`Admin contact notification email sent successfully. ID: ${data?.id}`);
+    return { success: true, data };
+  } catch (error) {
+    console.error(`Failed to send admin contact notification email:`, error);
+    return { success: false, error };
+  }
+};
+
+export const sendContactAutoResponse = async (contactInquiry: ContactInquiryData) => {
+  if (!process.env.RESEND_API_KEY) {
+    console.error('RESEND_API_KEY is not set. Skipping email.');
+    return { success: false, error: 'RESEND_API_KEY not set' };
+  }
+
+  if (!contactInquiry.email) {
+    console.error('Recipient email (to) is missing. Skipping email.');
+    return { success: false, error: 'Recipient email missing' };
+  }
+
+  if (!FROM_EMAIL || FROM_EMAIL.includes('yourdomain.com')) {
+    console.warn(`FROM_EMAIL ('${FROM_EMAIL}') is not configured correctly in lib/emailService.ts. Please update it with your verified Resend domain. Skipping email.`);
+    return { success: false, error: 'FROM_EMAIL not configured' };
+  }
+
+  const to = contactInquiry.email;
+  const subject = `Thank you for your inquiry: ${contactInquiry.subject}`;
+  const emailBody = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        body { font-family: sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #eee; border-radius: 5px; }
+        h1 { color: #555; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <h1>Thank you for your inquiry!</h1>
+        <p>Dear ${contactInquiry.name},</p>
+        <p>Thank you for reaching out to us. We have received your message and will get back to you soon.</p>
+        <p>Best regards,</p>
+        <p>Cigar Accessories Team</p>
+      </div>
+    </body>
+    </html>
+  `;
+
+  try {
+    const { data, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: to,
+      subject: subject,
+      html: emailBody,
+    });
+
+    if (error) {
+      console.error(`Error sending contact auto-response email:`, error);
+      return { success: false, error };
+    }
+
+    console.log(`Contact auto-response email sent successfully. ID: ${data?.id}`);
+    return { success: true, data };
+  } catch (error) {
+    console.error(`Failed to send contact auto-response email:`, error);
+    return { success: false, error };
+  }
+
+  try {
+    const { data, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: to,
+      subject: subject,
+      html: emailBody,
+    });
+
+    if (error) {
+      console.error(`Error sending contact auto-response email:`, error);
+      return { success: false, error };
+    }
+
+    console.log(`Contact auto-response email sent successfully. ID: ${data?.id}`);
+    return { success: true, data };
+  } catch (error) {
+    console.error(`Failed to send contact auto-response email:`, error);
     return { success: false, error };
   }
 };

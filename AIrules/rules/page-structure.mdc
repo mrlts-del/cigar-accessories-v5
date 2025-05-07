@@ -21,3 +21,54 @@ alwaysApply: false
 - Make sure all functions have parameter and return types defined
 - Server Components should not include client-side interactivity
 - Client Components must have `"use client"` at the top of the file
+
+### Avoiding Unused Variables
+- Always prefix unused parameters with underscore (e.g., `_request`, `_context`)
+- For API route handlers, always use the prefix format:
+export async function GET(_request: Request) {
+// Implementation that doesn't use request
+}
+
+- For try/catch blocks where error isn't used:
+try {
+// Code that might throw
+} catch (_error) {
+// Error handling without using error object
+}
+
+### API Route Patterns
+- Only include parameters your code will actually use
+- Use typed request parameters: `(_request: NextRequest)` rather than `any`
+- For required parameters your code doesn't use directly, always prefix with underscore:
+// CORRECT - Parameter is prefixed with underscore when unused
+export async function GET(_request: NextRequest) {
+return NextResponse.json({ data: "example" });
+}
+
+// INCORRECT - Will cause ESLint errors
+export async function GET(request: NextRequest) {
+return NextResponse.json({ data: "example" });
+}
+
+### Error Handling Best Practices
+- Only catch errors you plan to handle
+- Always use the error object in catch blocks, or prefix with underscore:
+// CORRECT - Using error variable
+try {
+const result = await someOperation();
+} catch (error) {
+console.error("Operation failed:", error.message);
+}
+
+// CORRECT - Prefix unused error with underscore
+try {
+await someOperation();
+} catch (_error) {
+// Generic error handling without using error details
+return { success: false };
+}
+
+### Variable Declaration
+- Declare variables only when you will actually use them
+- Never declare "placeholder" variables for future use
+- Consider using TypeScript's optional chaining (`?.`) and nullish coalescing (`??`) operators instead of temporary variables

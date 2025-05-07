@@ -4,14 +4,11 @@ import { notFound } from 'next/navigation';
 import { format } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge'; // Assuming Badge component exists
-// Removed unused Separator import
+import { Badge } from '@/components/ui/badge'; 
 import { Button } from '@/components/ui/button';
-import Image from 'next/image'; // Import next/image
+import Image from 'next/image'; 
 import { ArrowLeft } from 'lucide-react';
 
-// Define the expected shape of the API response for a single user
-// Should match the select clause in the API route
 interface AddressData {
   id: string;
   line1: string;
@@ -20,14 +17,14 @@ interface AddressData {
   state: string;
   postal: string;
   country: string;
-  type: string; // e.g., 'SHIPPING', 'BILLING'
+  type: string; 
 }
 
 interface OrderSummaryData {
   id: string;
   status: string;
-  payment?: { amount: number | null } | null; // Amount from related payment
-  createdAt: string; // ISO string format
+  payment?: { amount: number | null } | null; 
+  createdAt: string; 
 }
 
 interface UserDetailData {
@@ -36,13 +33,12 @@ interface UserDetailData {
   email: string | null;
   image?: string | null;
   role: string;
-  createdAt: string; // ISO string format
-  updatedAt: string; // ISO string format
+  createdAt: string; 
+  updatedAt: string; 
   addresses: AddressData[];
   orders: OrderSummaryData[];
 }
 
-// Server-side data fetching function
 async function getUserDetails(userId: string): Promise<UserDetailData | null> {
   const url = `${process.env.NEXT_PUBLIC_APP_URL}/api/admin/users/${userId}`;
 
@@ -51,16 +47,15 @@ async function getUserDetails(userId: string): Promise<UserDetailData | null> {
       headers: {
         Cookie: cookies().toString(),
       },
-      cache: 'no-store', // Ensure fresh data
+      cache: 'no-store', 
     });
 
     if (response.status === 404) {
-      return null; // User not found
+      return null; 
     }
 
     if (!response.ok) {
       console.error(`Error fetching user details: ${response.status} ${response.statusText}`);
-      // Consider throwing an error or returning a specific error state
       return null;
     }
 
@@ -72,12 +67,12 @@ async function getUserDetails(userId: string): Promise<UserDetailData | null> {
   }
 }
 
-// The Page component (Server Component)
-export default async function AdminCustomerDetailPage({ params }: { params: { userId: string } }) {
-  const user = await getUserDetails(params.userId);
+export default async function AdminCustomerDetailPage({ params }: { params: Promise<{ userId: string }> }) {
+  const { userId } = await params;
+  const user = await getUserDetails(userId);
 
   if (!user) {
-    notFound(); // Trigger 404 page if user not found
+    notFound(); 
   }
 
   const formatAddress = (addr: AddressData) => {
@@ -170,11 +165,11 @@ export default async function AdminCustomerDetailPage({ params }: { params: { us
                     <TableCell>
                       {order.payment?.amount != null ? `$${order.payment.amount.toFixed(2)}` : 'N/A'}
                     </TableCell>
-                     <TableCell>
-                        <Link href={`/admin/orders/${order.id}`}>
-                          <Button variant="outline" size="sm">View Order</Button>
-                        </Link>
-                      </TableCell>
+                    <TableCell>
+                      <Link href={`/admin/orders/${order.id}`}>
+                        <Button variant="outline" size="sm">View Order</Button>
+                      </Link>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -186,4 +181,4 @@ export default async function AdminCustomerDetailPage({ params }: { params: { us
       </Card>
     </div>
   );
-}
+};

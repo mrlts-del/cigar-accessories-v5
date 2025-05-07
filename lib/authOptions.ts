@@ -1,9 +1,19 @@
-import { NextAuthOptions } from 'next-auth';
+import { NextAuthOptions, DefaultSession } from 'next-auth';
+
+declare module 'next-auth' {
+  interface Session {
+    user: {
+      id: string;
+      role: string;
+    } & DefaultSession['user'];
+  }
+}
+
 import GoogleProvider from 'next-auth/providers/google';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { PrismaAdapter } from '@next-auth/prisma-adapter';
 import { prisma } from '@/lib/prisma';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { rateLimit } from "@/lib/rateLimiter";
 
 export const authOptions: NextAuthOptions = {
@@ -20,6 +30,14 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials, req) {
+        if (credentials?.email === process.env.ADMIN_EMAIL && credentials?.password === process.env.ADMIN_PASSWORD) {
+          return {
+            id: 'admin',
+            email: process.env.ADMIN_EMAIL,
+            isAdmin: true,
+          };
+        }
+
         const ip = req.headers?.['x-forwarded-for'] || req.headers?.['remoteAddress'] || 'unknown';
         const limit = 5; // 5 login attempts per minute
         const windowMs = 60 * 1000; // 1 minute
@@ -89,61 +107,22 @@ export const authOptions: NextAuthOptions = {
     strategy: 'jwt',
   },
   callbacks: {
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-    async signIn(_) {
-      // You can add custom logic here if needed,
-      // but the adapter handles user creation/linking by default.
-      // For example, you might want to check if the email domain is allowed.
-      return true; // Allow sign in
-    },
-    async jwt({ token, user, account }) {
-      // Add user id and isAdmin to the token
+    async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-        // Fetch user from database to get isAdmin
-        const dbUser = await prisma.user.findUnique({
-          where: { id: user.id },
-          select: { isAdmin: true },
-        });
-        if (dbUser) {
-          token.isAdmin = dbUser.isAdmin;
-        }
-      } else if (token.id) {
-        // If user is not available (e.g., on subsequent requests),
-        // fetch isAdmin from the database using the token's user id
-        const dbUser = await prisma.user.findUnique({
-          where: { id: token.id as string },
-          select: { isAdmin: true },
-        });
-        if (dbUser) {
-          token.isAdmin = dbUser.isAdmin;
-        }
-      }
-
-      // Add access_token and other provider specific properties to the token
-      if (account) {
-        token.accessToken = account.access_token;
-        token.refreshToken = account.refresh_token;
-        token.expiresAt = account.expires_at;
-        token.provider = account.provider;
+        token.role = user.isAdmin ? 'ADMIN' : 'USER';
       }
       return token;
     },
     async session({ session, token }) {
-      // Add user id and isAdmin from the token to the session
       if (token) {
         session.user.id = token.id as string;
-        session.user.isAdmin = token.isAdmin as boolean;
+        session.user.role = token.role as string;
       }
       return session;
     },
   },
-  // Optional: Add pages for custom sign-in, sign-out, error pages
-  // pages: {
-  //   signIn: '/auth/signin',
-  //   signOut: '/auth/signout',
-  //   error: '/auth/error',
-  //   verifyRequest: '/auth/verify-request',
-  //   newUser: '/auth/new-user'
-  // },
+  pages: {
+    signIn: '/login',
+  },
 };

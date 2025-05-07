@@ -34,3 +34,9 @@ alwaysApply: false
   ```ts
   import groupBy from "lodash/groupBy";
   ``` 
+
+  ## Additional Instuctions
+-Include ESLint configuration in the project to handle unused variables properly:
+- Prefix unused but required parameters with underscore (_request)
+- Prefix unused catch variables with underscore (_error)
+- Never define variables that aren't used in the code

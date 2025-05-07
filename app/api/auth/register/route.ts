@@ -1,63 +1,64 @@
-import { z } from "zod";
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import bcrypt from "bcrypt";
-import { withError } from "@/lib/withError"; // Assuming withError is exported from lib/withError
-import { rateLimit } from "@/lib/rateLimiter";
+// app/api/auth/register/route.ts
+import { NextResponse } from 'next/server';
+import bcrypt from 'bcryptjs';
+import { prisma } from 'lib/prisma'; // Adjusted path based on project structure
+import { z } from 'zod';
 
-const registerBody = z.object({
-  email: z.string().email(),
-  password: z.string().min(6), // Basic password length validation
+const userSchema = z.object({
+  name: z.string().min(2, { message: "Name must be at least 2 characters" }),
+  email: z.string().email({ message: "Valid email required" }),
+  password: z.string().min(6, { message: "Password must be at least 6 characters" }),
 });
 
-export type RegisterBody = z.infer<typeof registerBody>;
+export async function POST(req: Request) {
+  try {
+    const body = await req.json();
+    const validation = userSchema.safeParse(body);
 
-async function registerUser(body: RegisterBody) {
-  const { email, password } = body;
+    if (!validation.success) {
+      return NextResponse.json(
+        { message: 'Invalid input data', errors: validation.error.flatten().fieldErrors },
+        { status: 400 }
+      );
+    }
 
-  // Check if user already exists
-  const existingUser = await prisma.user.findUnique({
-    where: { email },
-  });
+    const { name, email, password } = validation.data;
 
-  if (existingUser) {
-    throw new Error("User with this email already exists.");
+    // Check if user already exists
+    const existingUser = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (existingUser) {
+      return NextResponse.json(
+        { message: 'User with this email already exists' },
+        { status: 409 } // 409 Conflict
+      );
+    }
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 12);
+    
+    // Create user
+    const user = await prisma.user.create({
+        data: {
+            name,
+            email,
+            passwordHash: hashedPassword, // Ensure your prisma schema uses 'passwordHash'
+        },
+    });
+    
+    // Don't return the password hash
+    const { ...userWithoutPassword } = user;
+
+    return NextResponse.json(userWithoutPassword, { status: 201 });
+  } catch (error) {
+    console.error('Registration API error:', error);
+    
+    // Redundant ZodError check if safeParse is used correctly, but good for safety
+    if (error instanceof z.ZodError) {
+      return NextResponse.json({ message: 'Invalid input data', errors: error.errors }, { status: 400 });
+    }
+    
+    return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
   }
-
-  // Hash the password
-  const passwordHash = await bcrypt.hash(password, 10); // 10 is the salt rounds
-
-  // Create the new user
-  const newUser = await prisma.user.create({
-    data: {
-      email,
-      passwordHash,
-      // Add other required fields here if any, based on your schema
-      // For now, assuming only email and passwordHash are required for basic auth
-    },
-    select: {
-      id: true,
-      email: true,
-      createdAt: true,
-    }, // Select fields to return, exclude passwordHash
-  });
-
-  return { user: newUser };
 }
-
-export const POST = withError(async (request: Request) => {
-  const ip = request.headers.get('x-forwarded-for') || request.headers.get('remote-address') || 'unknown';
-  const limit = 10; // 10 requests per minute
-  const windowMs = 60 * 1000; // 1 minute
-
-  if (rateLimit(ip, { limit, windowMs })) {
-    return new NextResponse("Too Many Requests", { status: 429 });
-  }
-
-  const json = await request.json();
-  const body = registerBody.parse(json);
-
-  const result = await registerUser(body);
-
-  return NextResponse.json(result, { status: 201 }); // 201 Created
-});

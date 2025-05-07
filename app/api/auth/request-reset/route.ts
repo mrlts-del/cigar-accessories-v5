@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma'; // Assuming prisma client is exported as a named export
 import crypto from 'crypto';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { sendPasswordResetRequestEmail } from '@/lib/emailService'; // Corrected function name
 import { rateLimit } from "@/lib/rateLimiter";
 

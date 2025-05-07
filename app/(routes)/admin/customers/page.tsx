@@ -1,117 +1,203 @@
-/// <reference types="node" />
-export const dynamic = 'force-dynamic';
-import { Suspense } from 'react';
-import { cookies } from 'next/headers'; // Needed for server-side fetch authentication
-import { CustomerList } from './components/CustomerList'; // Component to be created
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton'; // For loading state
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
+import { format } from 'date-fns';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/authOptions';
+import { prisma } from '@/lib/prisma';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import Image from 'next/image';
+import { ArrowLeft } from 'lucide-react';
 
-// Define the expected shape of the API response
-// Ideally, this would be shared from the API route, but defining here for clarity
-interface UserData {
+interface AddressData {
+  id: string;
+  line1: string;
+  line2?: string | null;
+  city: string;
+  state: string;
+  postal: string;
+  country: string;
+  type: string;
+}
+
+interface OrderSummaryData {
+  id: string;
+  status: string;
+  createdAt: string;
+}
+
+interface UserDetailData {
   id: string;
   name: string | null;
   email: string | null;
-  role: string;
-  createdAt: string; // Assuming ISO string format
   image?: string | null;
+  role: string;
+  createdAt: string;
+  updatedAt: string;
+  addresses: AddressData[];
+  orders: OrderSummaryData[];
 }
 
-interface PaginationData {
-  page: number;
-  limit: number;
-  totalUsers: number;
-  totalPages: number;
-}
-
-interface GetUsersResponse {
-  data: UserData[];
-  pagination: PaginationData;
-}
-
-// Server-side data fetching function
-async function getUsers(searchParams: { [key: string]: string | string[] | undefined }): Promise<GetUsersResponse | null> {
-  const page = searchParams?.page || '1';
-  const limit = searchParams?.limit || '10';
-  const search = searchParams?.search || '';
-
-  // Construct the URL with query parameters
-  const url = new URL(`${process.env.NEXT_PUBLIC_APP_URL}/api/admin/users`); // Use environment variable for base URL
-  url.searchParams.append('page', Array.isArray(page) ? page[0] : page);
-  url.searchParams.append('limit', Array.isArray(limit) ? limit[0] : limit);
-  if (search) {
-    url.searchParams.append('search', Array.isArray(search) ? search[0] : search);
-  }
-
+async function getUserDetails(userId: string): Promise<UserDetailData | null> {
   try {
-    // Fetch data server-side, passing cookies for authentication
-    const response = await fetch(url.toString(), {
-      headers: {
-        Cookie: cookies().toString(), // Pass cookies from the incoming request
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        addresses: true,
+        orders: {
+          take: 10,
+          orderBy: { createdAt: 'desc' },
+        },
       },
-      cache: 'no-store', // Ensure fresh data for admin view
     });
 
-    if (!response.ok) {
-      // Log error details if possible
-      console.error(`Error fetching users: ${response.status} ${response.statusText}`);
-      try {
-        const errorBody = await response.json();
-        console.error('Error body:', errorBody);
-      } catch { // Removed unused e variable
-        // Ignore if response body is not JSON
-      }
-      return null; // Indicate failure
+    if (!user) {
+      return null;
     }
 
-    const data: GetUsersResponse = await response.json();
-    return data;
+    const userDetail: UserDetailData = {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      image: user.image,
+      role: user.isAdmin ? 'ADMIN' : 'USER',
+      createdAt: user.createdAt.toISOString(),
+      updatedAt: user.updatedAt.toISOString(),
+      addresses: user.addresses,
+      orders: user.orders.map(order => ({
+        id: order.id,
+        status: order.status,
+        createdAt: order.createdAt.toISOString(),
+      })),
+    };
+
+    return userDetail;
   } catch (error) {
-    console.error('Failed to fetch users:', error);
-    return null; // Indicate failure
+    console.error('Error fetching user details:', error);
+    return null;
   }
 }
 
-// The Page component (Server Component)
-export default async function AdminCustomersPage({
-  searchParams,
-}: {
-  searchParams?: { [key: string]: string | string[] | undefined };
-}) {
-  const userData = await getUsers(searchParams || {});
+export default async function AdminCustomerDetailPage({ params }: { params: Promise<{ userId: string }> }) {
+  const { userId } = await params;
+  const session = await getServerSession(authOptions);
+
+  if (!session || !session.user?.id) {
+    notFound();
+  }
+
+  const user = await getUserDetails(userId);
+
+  if (!user) {
+    notFound();
+  }
+
+  const formatAddress = (addr: AddressData) => {
+    return `${addr.line1}${addr.line2 ? `, ${addr.line2}` : ''}, ${addr.city}, ${addr.state} ${addr.postal}, ${addr.country}`;
+  };
 
   return (
-    <div className="container mx-auto py-10">
+    <div className="container mx-auto py-10 space-y-6">
+      {/* Back Button */}
+      <Link href="/admin/customers">
+        <Button variant="outline" size="sm">
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Customers
+        </Button>
+      </Link>
+
+      {/* User Profile Card */}
       <Card>
         <CardHeader>
-          <CardTitle>Customer Management</CardTitle>
+          <div className="flex items-center space-x-4">
+            {user.image && (
+              <Image src={user.image} alt={user.name || 'User Avatar'} width={64} height={64} className="rounded-full" />
+            )}
+            <div>
+              <CardTitle>{user.name || 'Unnamed User'}</CardTitle>
+              <CardDescription>{user.email || 'No email provided'}</CardDescription>
+              <Badge variant={user.role === 'ADMIN' ? 'destructive' : 'secondary'} className="mt-1">
+                {user.role}
+              </Badge>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="text-sm text-muted-foreground">
+          <p>User ID: {user.id}</p>
+          <p>Joined: {format(new Date(user.createdAt), 'PPP')}</p>
+          <p>Last Updated: {format(new Date(user.updatedAt), 'PPP p')}</p>
+        </CardContent>
+      </Card>
+
+      {/* Addresses Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Addresses</CardTitle>
         </CardHeader>
         <CardContent>
-          {/* Wrap the component that uses useSearchParams in Suspense */}
-          <Suspense fallback={<CustomerListSkeleton />}>
-            <CustomerList
-              initialUsers={userData?.data ?? []} // Pass initial data or empty array
-              initialPagination={userData?.pagination} // Pass initial pagination or undefined
-              fetchError={!userData} // Pass a flag indicating fetch error
-            />
-          </Suspense>
+          {user.addresses.length > 0 ? (
+            <ul className="space-y-3">
+              {user.addresses.map((addr) => (
+                <li key={addr.id} className="text-sm border-b pb-2 last:border-b-0">
+                  <Badge variant="outline" className="mr-2 capitalize">{addr.type.toLowerCase()}</Badge>
+                  {formatAddress(addr)}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-muted-foreground">No addresses found for this user.</p>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Order History Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Recent Order History (Last 10)</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {user.orders.length > 0 ? (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Order ID</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Total</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {user.orders.map((order) => (
+                  <TableRow key={order.id}>
+                    <TableCell className="font-medium truncate max-w-[100px]">
+                      <Link href={`/admin/orders/${order.id}`} className="hover:underline text-blue-600">
+                        {order.id}
+                      </Link>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="secondary">{order.status}</Badge>
+                    </TableCell>
+                    <TableCell>{format(new Date(order.createdAt), 'PP')}</TableCell>
+                    <TableCell>
+                      N/A
+                    </TableCell>
+                    <TableCell>
+                      <Link href={`/admin/orders/${order.id}`}>
+                        <Button variant="outline" size="sm">View Order</Button>
+                      </Link>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          ) : (
+            <p className="text-sm text-muted-foreground">No orders found for this user.</p>
+          )}
         </CardContent>
       </Card>
     </div>
   );
-}
-
-// Skeleton component for loading state
-function CustomerListSkeleton() {
-  return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <Skeleton className="h-8 w-1/4" /> {/* Search Input Skeleton */}
-      </div>
-      <Skeleton className="h-64 w-full" /> {/* Table Skeleton */}
-      <div className="flex justify-end">
-        <Skeleton className="h-8 w-1/4" /> {/* Pagination Skeleton */}
-      </div>
-    </div>
-  );
-}
+};

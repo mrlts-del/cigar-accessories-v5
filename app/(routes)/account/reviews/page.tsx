@@ -2,7 +2,7 @@
 import { useState, Suspense } from 'react';
 import { useQuery } from '@tanstack/react-query'; // Removed unused useMutation, useQueryClient
 import { useSession } from 'next-auth/react';
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
 import Link from 'next/link';
 import Image from 'next/image'; // Import next/image
 import { format } from 'date-fns';
@@ -35,7 +35,7 @@ interface Review {
 const fetchUserReviews = async (): Promise<Review[]> => {
   // The prompt lists GET /api/reviews. We assume the backend filters by the logged-in user.
   // If it requires explicit user ID, adjust the endpoint: `/api/reviews?userId=me` or similar.
-  const { data } = await axios.get<Review[]>('/api/reviews');
+  const { data } = await axios.get('/api/reviews');
   return data;
 };
 
@@ -52,13 +52,11 @@ export default function ReviewsPage() {
   const [, setIsDeleteModalOpen] = useState(false); // Removed unused isDeleteModalOpen
   const [/*selectedReview*/, setSelectedReview] = useState<Review | null>(null); // Commented out unused selectedReview
 
-  const { data: reviews, isLoading, isError, error } = useQuery<Review[], AxiosError>(
-    ['userReviews'],
-    fetchUserReviews,
-    {
-      enabled: status === 'authenticated',
-    }
-  );
+  const { data: reviews, isLoading, isError, error } = useQuery({
+    queryKey: ['userReviews'],
+    queryFn: fetchUserReviews,
+    enabled: status === 'authenticated',
+  });
 
   // Delete Mutation
   // Delete mutation is currently unused and has been removed.
@@ -95,7 +93,7 @@ export default function ReviewsPage() {
   }
 
   if (isError) {
-    return <p className="text-red-500">Error loading reviews: {axios.isAxiosError(error) && typeof error.response?.data === 'object' && error.response.data && 'message' in error.response.data ? String(error.response.data.message) : error?.message}</p>;
+    return <p className="text-red-500">Error loading reviews: {error.message}</p>;
   }
 
   return (

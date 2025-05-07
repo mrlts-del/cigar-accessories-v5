@@ -1,12 +1,12 @@
 import React, { Suspense } from 'react';
 import ResetPasswordForm from './ResetPasswordForm';
 
-export default function ResetPasswordPage() {
+const ResetPasswordPage = () => {
   return (
-    <div className="flex justify-center items-center min-h-screen">
-      <Suspense fallback={<div>Loading form...</div>}>
-        <ResetPasswordForm />
-      </Suspense>
-    </div>
+    <Suspense fallback={<div>Loading...</div>}>
+      <ResetPasswordForm />
+    </Suspense>
   );
-}
+};
+
+export default ResetPasswordPage;

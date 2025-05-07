@@ -64,3 +64,13 @@ export const ExampleForm = () => {
 - Use descriptive error messages
 - Validate form inputs before submission
 - Show validation errors inline next to form fields
+
+## Additional Instructions
+
+-For try/catch blocks where the error variable isn't used, prefix with underscore:
+
+try {
+  // implementation
+} catch (_error) {
+  // error handling without using error variable
+}

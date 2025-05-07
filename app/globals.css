@@ -66,3 +66,16 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Add custom gold color classes */
+.text-gold-500 {
+  color: #ffd700; /* Gold color */
+}
+
+.bg-gold-500 {
+  background-color: #ffd700; /* Gold color */
+}
+
+.bg-gold-500:hover {
+  background-color: #ffc107; /* Darker gold on hover */
+}

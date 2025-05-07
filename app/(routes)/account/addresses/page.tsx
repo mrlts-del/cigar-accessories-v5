@@ -1,5 +1,6 @@
 'use client';
 
+import React, { Suspense } from 'react';
 import { useState } from 'react';
 import useSWR from 'swr';
 import { toast } from 'react-hot-toast';
@@ -13,13 +14,11 @@ import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
 } from '@/app/components/ui/dialog';
 import AccountAddressForm from '../components/AccountAddressForm'; // Using the new account address form
 
-
-const AddressesPage = () => {
+const AddressesPageClient = () => {
   const { data: addresses, error, isLoading, mutate } = useSWR<Address[]>('/api/users/me/addresses', fetcher);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAddress, setEditingAddress] = useState<Address | null>(null);
@@ -98,12 +97,9 @@ const AddressesPage = () => {
           </div>
         )}
       </CardContent>
-
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>{editingAddress ? 'Edit Address' : 'Add New Address'}</DialogTitle>
-          </DialogHeader>
+          <DialogTitle>{editingAddress ? 'Edit Address' : 'Add New Address'}</DialogTitle>
           <AccountAddressForm
             initialData={editingAddress}
             onSuccess={handleFormSuccess}
@@ -111,6 +107,14 @@ const AddressesPage = () => {
         </DialogContent>
       </Dialog>
     </Card>
+  );
+};
+
+const AddressesPage = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <AddressesPageClient />
+    </Suspense>
   );
 };
 

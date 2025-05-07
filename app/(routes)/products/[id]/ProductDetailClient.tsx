@@ -2,9 +2,6 @@
 
 import { useState } from 'react';
 import type { Product, Variant } from 'types/product';
-import { AdvancedImage } from "@cloudinary/react";
-// Removed unused quality import
-import Image from 'next/image'; // Import next/image
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast'; // Corrected path
@@ -12,6 +9,7 @@ import { useAddToCart } from '@/hooks/useCartApi'; // Import specific hook
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { formatPrice } from '@/lib/utils'; // Assuming a utility for price formatting
+import Image from 'next/image'; // Import next/image
 
 // Define the expected props type, including variants
 interface ProductDetailClientProps {
@@ -23,7 +21,7 @@ const ProductDetailClient = ({ product }: ProductDetailClientProps) => {
   // Local helper removed, using imported one now
   const [quantity, setQuantity] = useState(1);
   const { toast } = useToast();
-  const { mutateAsync: addItem, isLoading } = useAddToCart(); // Use isLoading instead of isPending
+  const { mutateAsync: addItem, isPending } = useAddToCart(); // Use isPending instead of isLoading
 
   const handleQuantityChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(event.target.value, 10);
@@ -73,10 +71,6 @@ const ProductDetailClient = ({ product }: ProductDetailClientProps) => {
   // Image display logic using product.imagePath
   const primaryImageUrl = product.imagePath || '/placeholder.png'; // Use placeholder if no imagePath
 
-  // Cloudinary functionality removed as lib/cloudinaryFrontend was deleted.
-  // Using next/image fallback directly.
-  const cldImage = null; // Explicitly set to null as Cloudinary is not used here
-
   // Determine stock status (example logic, adjust based on your schema)
   // Stock status (using first variant's inventory - needs proper variant selection UI for accuracy)
   const firstVariantForStock = product.variants?.[0];
@@ -87,16 +81,7 @@ const ProductDetailClient = ({ product }: ProductDetailClientProps) => {
       <div className="grid md:grid-cols-2 gap-6 lg:gap-12 items-start">
         {/* Image Section */}
         <div className="aspect-square relative bg-gray-100 dark:bg-gray-800">
-           {cldImage ? (
-             <AdvancedImage
-               cldImg={cldImage}
-               alt={product.name}
-               className="object-cover w-full h-full"
-             />
-           ) : (
-             // Fallback display using next/image
-             <Image src={primaryImageUrl} alt={product.name} fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" />
-           )}
+           <Image src={primaryImageUrl} alt={product.name} fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" />
         </div>
 
         {/* Details Section */}
@@ -127,7 +112,7 @@ const ProductDetailClient = ({ product }: ProductDetailClientProps) => {
              <div className="flex items-center gap-4 w-full">
                 <label htmlFor="quantity" className="font-medium">Quantity:</label>
                 <div className="flex items-center border rounded-md">
-                    <Button variant="outline" size="icon" onClick={decrementQuantity} disabled={quantity <= 1 || isLoading}>-</Button>
+                    <Button variant="outline" size="icon" onClick={decrementQuantity} disabled={quantity <= 1 || isPending}>-</Button>
                     <Input
                         id="quantity"
                         type="number"
@@ -135,18 +120,18 @@ const ProductDetailClient = ({ product }: ProductDetailClientProps) => {
                         onChange={handleQuantityChange}
                         className="w-16 text-center border-l border-r rounded-none focus-visible:ring-0"
                         min="1"
-                        disabled={isLoading}
+                        disabled={isPending}
                     />
-                    <Button variant="outline" size="icon" onClick={incrementQuantity} disabled={isLoading}>+</Button>
+                    <Button variant="outline" size="icon" onClick={incrementQuantity} disabled={isPending}>+</Button>
                 </div>
              </div>
             <Button
               size="lg"
               className="w-full"
               onClick={handleAddToCart}
-              disabled={isLoading} // Disable button while adding
+              disabled={isPending} // Disable button while adding
             >
-              {isLoading ? 'Adding...' : 'Add to Cart'}
+              {isPending ? 'Adding...' : 'Add to Cart'}
             </Button>
           </CardFooter>
         </div>

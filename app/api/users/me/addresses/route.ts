@@ -23,6 +23,25 @@ const addressSchema = z.object({
 
 export type AddressInput = z.infer<typeof addressSchema>;
 
+// GET handler to fetch addresses for the current user
+export const GET = withError(async () => {
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user?.id) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const addresses = await prisma.address.findMany({
+      where: { userId: session.user.id },
+    });
+    return NextResponse.json(addresses);
+  } catch (error) {
+    console.error("Failed to fetch addresses:", error);
+    return NextResponse.json({ message: "Failed to fetch addresses" }, { status: 500 });
+  }
+});
+
 // POST handler to add a new address for the current user
 export const POST = withError(async (request: Request) => {
   const session = await getServerSession(authOptions);

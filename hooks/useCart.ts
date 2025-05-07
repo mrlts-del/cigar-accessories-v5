@@ -174,10 +174,10 @@ export function useCart() {
 
   // Loading and error states
   const loading =
-    addToCartApi.isLoading ||
-    updateCartItemApi.isLoading ||
-    removeCartItemApi.isLoading ||
-    mergeCartApi.isLoading ||
+    addToCartApi.isPending ||
+    updateCartItemApi.isPending ||
+    removeCartItemApi.isPending ||
+    mergeCartApi.isPending ||
     fetchCartResult.isLoading;
 
   const error =

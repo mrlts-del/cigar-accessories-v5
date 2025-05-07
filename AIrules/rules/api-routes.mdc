@@ -73,3 +73,11 @@ export const GET = withError(
 - Always validate authentication with `auth()`
 - Export typed responses for client usage
 - For routes with dynamic parameters, use the new Next.js 15+ params format with async params
+- When creating API route handlers that require parameters by convention but don't use them, prefix them with underscore:
+
+export async function GET(_request: Request) {
+  // implementation
+}
+
+-Never create route handlers with unused parameters without the underscore prefix.
+

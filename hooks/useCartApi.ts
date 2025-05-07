@@ -7,23 +7,20 @@ const CART_MERGE_API = "/api/cart/merge";
 
 // Fetch cart (for logged-in users)
 export function useFetchCart(enabled: boolean) {
-  return useQuery<CartApiItem[]>( // Pass queryKey and queryFn as separate args
-    ["cart"], // queryKey
-    async () => { // queryFn
+  return useQuery({
+    queryKey: ['cart'],
+    queryFn: async () => {
       const res = await fetch(CART_API, { credentials: "include" });
       if (!res.ok) throw new Error("Failed to fetch cart");
       const data = await res.json();
-      // Ensure the returned value matches the <CartApiItem[]> type hint
-      // Assuming API returns { cart: { ..., items: CartApiItem[] } }
       if (data && data.cart && Array.isArray(data.cart.items)) {
         return data.cart.items;
       }
-      // Handle cases where the structure might be different or data is missing
       console.warn("Unexpected cart API response structure:", data);
       return []; // Return empty array as a fallback
     },
-    { enabled } // options
-  );
+    enabled,
+  });
 }
 
 // Add item to cart (API)

@@ -122,7 +122,7 @@ export default function ProductsPage() {
         description="Are you sure you want to delete this product? This action cannot be undone."
         onConfirm={() => deleteId && deleteMutation.mutate(deleteId)}
         onCancel={() => setDeleteId(null)}
-        loading={deleteMutation.isLoading}
+        loading={deleteMutation.isPending}
       />
     </div>
   );

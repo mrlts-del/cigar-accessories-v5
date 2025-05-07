@@ -1,89 +1,30 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma"; // Assuming prisma is exported as a named export
-import { withError } from "@/lib/withError"; // Assuming withError is exported as a named export
-// Define interfaces for related models (assuming structure)
-interface ProductMedia {
-  id: string;
-  url: string;
-  altText?: string | null;
-}
+import { prisma } from "@/lib/prisma";
+import { withError } from "@/lib/withError";
 
-interface Category {
-  id: string;
-  name: string;
-  slug: string;
-}
+export const GET = withError(async (_request: Request, { params }: { params: Promise<{ id: string }> }) => {
+  const { id } = await params;
+  const product = await getProduct(id);
 
-// Define a more specific type for the product including relations
-interface ProductWithDetails {
-  id: string;
-  name: string;
-  description: string | null;
-  price: number; // Assuming price is a number, adjust if Decimal
-  sku: string | null;
-  stock: number;
-  createdAt: Date;
-  updatedAt: Date;
-  // Add other Product fields as needed based on schema
-  media: ProductMedia[];
-  categories: Category[];
-}
+  if (!product) {
+    return NextResponse.json({ error: "Product not found" }, { status: 404 });
+  }
 
-// Define response type using the specific interface
-export type GetProductResponse = {
-  product: ProductWithDetails | null;
-};
+  return NextResponse.json(product);
+});
 
-export const GET = withError(
-  async (
-    request: Request,
-    { params }: { params: { id: string } }
-  ) => {
-    const { id } = params;
-
-    // Fetch single product by ID
-    const productQueryResult = await prisma.product.findUnique({
-      where: {
-        id: id,
-      },
-      select: {
-        id: true,
-        name: true,
-        description: true,
-        price: true,
-        createdAt: true,
-        updatedAt: true,
-        media: true,
-        categories: true,
-        variants: {
-          select: {
-            sku: true,
-            inventory: true,
-          },
-          take: 1,
-        },
+async function getProduct(id: string) {
+  try {
+    const product = await prisma.product.findUnique({
+      where: { id },
+      include: {
+        categories: true, // Corrected from category to categories
+        variants: true,
       },
     });
-
-    let product: ProductWithDetails | null = null;
-
-    if (productQueryResult) {
-      product = {
-        id: productQueryResult.id,
-        name: productQueryResult.name,
-        description: productQueryResult.description,
-        price: productQueryResult.price.toNumber(), // Convert Decimal to number
-        sku: productQueryResult.variants.length > 0 ? productQueryResult.variants[0].sku : null,
-        stock: productQueryResult.variants.length > 0 ? productQueryResult.variants[0].inventory : 0,
-        createdAt: productQueryResult.createdAt,
-        updatedAt: productQueryResult.updatedAt,
-        media: productQueryResult.media,
-        categories: productQueryResult.categories,
-      };
-    }
-
-    // Return response
-    const result: GetProductResponse = { product };
-    return NextResponse.json(result);
+    return product;
+  } catch (error) {
+    console.error('Error fetching product:', error);
+    return null;
   }
-);
+}

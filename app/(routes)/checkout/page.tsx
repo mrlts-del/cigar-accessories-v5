@@ -1,5 +1,6 @@
 'use client';
 
+import React, { Suspense } from 'react';
 import Container from '@/components/ui/container';
 import Heading from '@/components/ui/heading';
 import { Separator } from '@/components/ui/separator';
@@ -10,7 +11,7 @@ import AddressForm from './components/AddressForm';
 
 // TODO: Implement route protection for logged-in users
 
-const CheckoutPage = () => {
+const CheckoutPageClient = () => {
   const [isMounted, setIsMounted] = useState(false);
   const cart = useCartStore();
 
@@ -42,6 +43,14 @@ const CheckoutPage = () => {
         </div>
       </Container>
     </div>
+  );
+};
+
+const CheckoutPage = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <CheckoutPageClient />
+    </Suspense>
   );
 };
 
